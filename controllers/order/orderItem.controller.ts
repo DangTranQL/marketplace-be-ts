@@ -8,7 +8,7 @@ interface OrderItemController {
 }
 
 const orderItemController: OrderItemController = {
-  createItem: catchAsync(async (req, res, next) => {
+  createItem: catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const { orderID, productID, quantity, itemPrice } = req.body;
     // check if item already exists
     let checkItem = await OrderItem.findOne({ productID, isDeleted: false });
@@ -16,10 +16,10 @@ const orderItemController: OrderItemController = {
       throw new AppError(400, "Item already exists", "Create Item Error");
     }
     let newItem = await OrderItem.create({ orderID, productID, quantity, itemPrice });
-    sendResponse(res, 200, true, { item: newItem }, null, "Item created");
+    sendResponse(res, 200, true, { newItem }, null, "Item created");
   }),
 
-  getAllItems: catchAsync(async (req, res, next) => {
+  getAllItems: catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     let { id } = req.params;
     let allItems = await OrderItem.find({ orderID: id, isDeleted: false });
     sendResponse(res, 200, true, { allItems }, null, null);
