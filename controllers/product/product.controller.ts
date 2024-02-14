@@ -13,7 +13,10 @@ interface ProductController {
 type FilterConditionType = {
   isDeleted: boolean;
   title?: { $regex: string, $options: string }; 
-  category?: { $regex: string, $options: string }; 
+  category?: { $regex: string, $options: string };
+  min?: number;
+  max?: number;
+  price?: { $gte?: number, $lte?: number };
 };
 
 const productController: ProductController = {
@@ -41,10 +44,30 @@ const productController: ProductController = {
         title: { $regex: filter.title as string, $options: "i" },
       });
     }
+
     if (filter.category) {
       filterCondition.push({
         isDeleted: false,
         category: { $regex: filter.category as string, $options: "i" },
+      });
+    }
+
+    if (filter.min && filter.max) {
+      filterCondition.push({
+        isDeleted: false,
+        price: { $gte: parseInt(filter.min as string), $lte: parseInt(filter.max as string) },
+      });
+    }
+    else if (filter.min) {
+      filterCondition.push({
+        isDeleted: false,
+        price: { $gte: parseInt(filter.min as string) },
+      });
+    }
+    else if (filter.max) {
+      filterCondition.push({
+        isDeleted: false,
+        price: { $lte: parseInt(filter.max as string) },
       });
     }
 
