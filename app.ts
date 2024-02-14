@@ -7,7 +7,7 @@ import mongoose from "mongoose";
 import dotenv from 'dotenv'; 
 dotenv.config();
 import { sendResponse, AppError } from "./helpers/utils";
-// import indexRouter from "./routes/index";/
+import indexRouter from "./routes/index";
 
 const app: Express = express();
 
@@ -32,10 +32,7 @@ mongoose
   .then(() => console.log(`DB connected ${mongoURI}`))
   .catch((err) => console.error(err));
 
-// app.use("/", indexRouter);
-app.use("/", (req: Request, res: Response) => {
-    return sendResponse(res, 200, true, null, {}, "HEllo World");
-});
+app.use("/", indexRouter);
 
 // catch 404 and forward to error handler
 app.use((req: Request, res: Response, next: NextFunction) => {

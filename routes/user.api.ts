@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router();
-import userController from "../controllers/user.controller";
+import userController from "../controllers/user/user.controller";
 import { validateCreateUser, validateId } from "../helpers/validation";
 
 router.post("/", validateCreateUser, userController.createUser);

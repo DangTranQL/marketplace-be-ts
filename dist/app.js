@@ -12,7 +12,7 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const utils_1 = require("./helpers/utils");
-// import indexRouter from "./routes/index";/
+const index_1 = __importDefault(require("./routes/index"));
 const app = (0, express_1.default)();
 app.use((0, morgan_1.default)("dev"));
 app.use(express_1.default.json());
@@ -30,10 +30,7 @@ mongoose_1.default
     .connect(mongoURI)
     .then(() => console.log(`DB connected ${mongoURI}`))
     .catch((err) => console.error(err));
-// app.use("/", indexRouter);
-app.use("/", (req, res) => {
-    return (0, utils_1.sendResponse)(res, 200, true, null, {}, "HEllo World");
-});
+app.use("/", index_1.default);
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
     const err = new utils_1.AppError(404, "Not Found", "Bad Request");

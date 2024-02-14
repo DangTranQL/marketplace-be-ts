@@ -32,7 +32,7 @@ const orderSchema = new mongoose_1.Schema({
         required: true,
         default: "pending",
     },
-    price: { type: Number, optional: true, trim: true, minlength: 3 },
+    price: { type: Number, required: true, trim: true, minlength: 3, default: 0 },
     paymentMethod: { type: String, optional: true, trim: true, minlength: 3 },
     isDeleted: { type: Boolean, default: false },
 }, {

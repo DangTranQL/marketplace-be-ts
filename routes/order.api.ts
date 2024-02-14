@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router();
-import orderController from "../controllers/order.controller";
+import orderController from "../controllers/order/order.controller";
 import { validateCreateOrder, validateId, validateUserID } from "../helpers/validation";
 
 router.post("/", validateCreateOrder, orderController.createOrder);
