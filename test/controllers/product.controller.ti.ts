@@ -1,109 +1,140 @@
-import request from 'supertest';
 import app from '../../app';
-import { describe, it, expect, beforeAll } from '@jest/globals';
+import { describe, it, before, after, afterEach } from 'mocha';
+import { expect } from 'chai';
+import supertest from 'supertest';
+import mongoose from 'mongoose';
 import Product from '../../models/product';
 
+const request = supertest(app);
+
 describe('Product Controller', () => {
-    beforeAll(async () => {
+    before(async () => {
+        // Connect to a test database
+        await mongoose.connect('mongodb://localhost/test');
+    });
+    
+    after(async () => {
+        // Disconnect from the test database
+        await mongoose.disconnect();
+    });
+    
+    afterEach(async () => {
+        // Clean up the database after each test
         await Product.deleteMany({});
     });
-
-    describe('POST /product', () => {
+    
+    describe('POST /products', () => {
         it('should create a new product', async () => {
-            const res = await request(app)
-                .post('/product')
-                .send({
-                    name: 'testproduct',
-                    description: 'testdescription',
-                    price: 100,
-                    stock: 100
-                });
+        const res = await request.post('/products').send({
+            name: 'testproduct',
+            description: 'test description',
+            price: 10.99,
+            category: 'test category',
+            stocks: 10,
+            image: 'testimage'
+        });
+    
+        expect(res.status).to.equal(200);
+        expect(res.body.data.newProduct.name).to.equal('testproduct');
+        expect(res.body.data.newProduct.description).to.equal('test description');
+        });
+    });
+    
+    describe('GET /products', () => {
+        it('should get all products', async () => {
+        // Create a product
+        await Product.create({
+            name: 'testproduct',
+            description: 'test description',
+            price: 10.99,
+            category: 'test category',
+            stocks: 10,
+            image: 'testimage'
+        });
+    
+        const res = await request.get('/products');
+    
+        expect(res.status).to.equal(200);
+        expect(res.body.data.products).to.be.an('array');
+        expect(res.body.data.products[0].name).to.equal('testproduct');
+        });
+    });
+    
+    describe('GET /products/:id', () => {
+        it('should get a product by id', async () => {
+        // Create a product
+        const product = await Product.create({
+            name: 'testproduct',
+            description: 'test description',
+            price: 10.99,
+            category: 'test category',
+            stocks: 10,
+            image: 'testimage'
+        });
+    
+        const res = await request.get(`/products/${product._id}`);
+    
+        expect(res.status).to.equal(200);
+        expect(res.body.data.product.name).to.equal('testproduct');
+        });
+    });
+    
+    describe('PUT /products/:id', () => {
+        it('should update a product by id', async () => {
+        // Create a product
+        const product = await Product.create({
+            name: 'testproduct',
+            description: 'test description',
+            price: 14.00,
+            category: 'test category',
+            stocks: 10,
+            image: 'testimage'
+        });
 
-            expect(res.status).toBe(200);
-            expect(res.body).toHaveProperty('newProduct');
-            expect(res.body.newProduct.name).toHaveProperty('testproduct');
+        const res = await request.put(`/products/${product._id}`).send({
+            price: 15.00
+        });
+
+        expect(res.status).to.equal(200);
+        expect(res.body.data.product.price).to.equal(15.00);
         });
     });
 
-    describe('GET /product', () => {
-        it('should get products', async () => {
-            const res = await request(app)
-                .get('/product');
-
-            expect(res.status).toBe(200);
-            expect(res.body).toHaveProperty('products');
+    describe('DELETE /products/:id', () => {
+        it('should delete a product by id', async () => {
+        // Create a product
+        const product = await Product.create({
+            name: 'testproduct',
+            description: 'test description',
+            price: 14.00,
+            category: 'test category',
+            stocks: 10,
+            image: 'testimage'
         });
 
-        it('should get product by title', async () => {
-            const res = await request(app)
-                .get('/product?title=testproduct');
+        const res = await request.delete(`/products/${product._id}`);
 
-            expect(res.status).toBe(200);
-            expect(res.body).toHaveProperty('products');
-            expect(res.body.products[0].name).toHaveProperty('testproduct');
-        });
-
-        it('should get product by category', async () => {
-            const res = await request(app)
-                .get('/product?category=testcategory');
-
-            expect(res.status).toBe(200);
-            expect(res.body).toHaveProperty('products');
+        expect(res.status).to.equal(200);
+        expect(res.body.data.product.isDeleted).to.equal(true);
         });
     });
 
-    describe('GET /product/:id', () => {
-        it('should get product by id', async () => {
-            const product = await Product.findOne({ name: 'testproduct' });
-
-            if (!product) {
-                throw new Error('Product not found');
-            }
-
-            const res = await request(app)
-                .get(`/product/${product._id}`);
-
-            expect(res.status).toBe(200);
-            expect(res.body).toHaveProperty('product');
-            expect(res.body.product.name).toHaveProperty('testproduct');
-        });
-    });
-
-    describe('DELETE /product/:id', () => {
-        it('should delete product by id', async () => {
-            const product = await Product.findOne({ name: 'testproduct' });
-
-            if (!product) {
-                throw new Error('Product not found');
-            }
-
-            const res = await request(app)
-                .delete(`/product/${product._id}`);
-
-            expect(res.status).toBe(200);
-            expect(res.body).toHaveProperty('deletedProduct');
-            expect(res.body.deletedProduct.name).toHaveProperty('testproduct');
-        });
-    });
-
-    describe('DELETE /product/:title', () => {
-        it('should delete product by title', async () => {
-            const res = await request(app)
-                .delete('/product/testproduct');
-
-            expect(res.status).toBe(200);
-            expect(res.body).toHaveProperty('deletedProduct');
-            expect(res.body.deletedProduct.name).toHaveProperty('testproduct');
-        });
-    });
-
-    describe('DELETE /product', () => {
+    describe('DELETE /products', () => {
         it('should delete all products', async () => {
-            const res = await request(app)
-                .delete('/product');
+        // Create a product
+        await Product.create({
+            name: 'testproduct',
+            description: 'test description',
+            price: 14.00,
+            category: 'test category',
+            stocks: 10,
+            image: 'testimage'
+        });
 
-            expect(res.status).toBe(200);
-            expect(res.body).toHaveProperty('products');
+        const res = await request.delete(`/products`);
+
+        expect(res.status).to.equal(200);
+        expect(res.body.data.products).to.equal(1);
         });
     });
-})
+});

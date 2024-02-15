@@ -11,7 +11,8 @@ router.post("/", validation_1.validateCreateUser, user_controller_1.default.crea
 router.get("/", user_controller_1.default.getUsers);
 router.get("/:id", validation_1.validateId, user_controller_1.default.getUserById);
 router.get("/:id/orders", validation_1.validateId, user_controller_1.default.getOrder);
-router.put("/:id", validation_1.validateId, user_controller_1.default.createOrderItem);
+router.put("/:id", validation_1.validateId, user_controller_1.default.updateUserById);
+router.put("/:id/orders", validation_1.validateId, user_controller_1.default.createOrderItem);
 router.delete("/:id", validation_1.validateId, user_controller_1.default.deleteUserById);
 router.delete("/:username", user_controller_1.default.deleteUserByUsername);
 router.delete("/", user_controller_1.default.deleteAllUsers);

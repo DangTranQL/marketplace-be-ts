@@ -69,6 +69,22 @@ const userController = {
         }
         (0, utils_1.sendResponse)(res, 200, true, { user }, null, null);
     })),
+    updateUserById: (0, utils_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+        const { id } = req.params;
+        const { username, email, password, role, address, phone } = req.body;
+        let user = yield user_1.default.findOne({ _id: id, isDeleted: false });
+        if (!user) {
+            throw new utils_1.AppError(404, "User not found", "Update User Error");
+        }
+        user.username = username;
+        user.email = email;
+        user.password = password;
+        user.role = role;
+        user.address = address;
+        user.phone = phone;
+        yield user.save();
+        (0, utils_1.sendResponse)(res, 200, true, { user }, null, "User updated");
+    })),
     createOrderItem: (0, utils_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         const { id } = req.params;
         const { productID, quantity, price } = req.body;

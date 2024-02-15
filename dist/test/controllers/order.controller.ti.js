@@ -12,129 +12,148 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const supertest_1 = __importDefault(require("supertest"));
 const app_1 = __importDefault(require("../../app"));
-const globals_1 = require("@jest/globals");
+const mocha_1 = require("mocha");
+const chai_1 = require("chai");
+const supertest_1 = __importDefault(require("supertest"));
+const mongoose_1 = __importDefault(require("mongoose"));
 const order_1 = __importDefault(require("../../models/order"));
 const orderItem_1 = __importDefault(require("../../models/orderItem"));
-(0, globals_1.describe)('Order Controller', () => {
-    (0, globals_1.beforeAll)(() => __awaiter(void 0, void 0, void 0, function* () {
+const request = (0, supertest_1.default)(app_1.default);
+(0, mocha_1.describe)('Order Controller', () => {
+    (0, mocha_1.before)(() => __awaiter(void 0, void 0, void 0, function* () {
+        // Connect to a test database
+        yield mongoose_1.default.connect('mongodb://localhost/test');
+    }));
+    (0, mocha_1.after)(() => __awaiter(void 0, void 0, void 0, function* () {
+        // Disconnect from the test database
+        yield mongoose_1.default.disconnect();
+    }));
+    (0, mocha_1.afterEach)(() => __awaiter(void 0, void 0, void 0, function* () {
+        // Clean up the database after each test
         yield order_1.default.deleteMany({});
     }));
-    (0, globals_1.describe)('POST /order', () => {
-        (0, globals_1.it)('should create a new order', () => __awaiter(void 0, void 0, void 0, function* () {
-            const res = yield (0, supertest_1.default)(app_1.default)
-                .post('/order')
-                .send({
-                user: 'testuser',
-                products: [
-                    {
-                        product: 'testproduct',
-                        quantity: 1
-                    }
-                ],
-                total: 100
+    (0, mocha_1.describe)('POST /orders', () => {
+        (0, mocha_1.it)('should create a new order', () => __awaiter(void 0, void 0, void 0, function* () {
+            const res = yield request.post('/orders').send({
+                userID: '123',
+                status: 'pending',
+                paymentMethod: 'card',
             });
-            (0, globals_1.expect)(res.status).toBe(200);
-            (0, globals_1.expect)(res.body).toHaveProperty('newOrder');
-            (0, globals_1.expect)(res.body.newOrder.user).toHaveProperty('testuser');
+            (0, chai_1.expect)(res.status).to.equal(200);
+            (0, chai_1.expect)(res.body.data.newOrder.userID).to.equal('123');
+            (0, chai_1.expect)(res.body.data.newOrder.status).to.equal('pending');
         }));
     });
-    (0, globals_1.describe)('GET /order/:id', () => {
-        (0, globals_1.it)('should get order by id', () => __awaiter(void 0, void 0, void 0, function* () {
-            const order = yield order_1.default.findOne({ user: 'testuser' });
-            if (!order) {
-                throw new Error('Order not found');
-            }
-            const res = yield (0, supertest_1.default)(app_1.default)
-                .get(`/order/${order._id}`);
-            (0, globals_1.expect)(res.status).toBe(200);
-            (0, globals_1.expect)(res.body).toHaveProperty('order');
-            (0, globals_1.expect)(res.body.order.user).toHaveProperty('testuser');
-        }));
-    });
-    (0, globals_1.describe)('GET /order/search/:userID', () => {
-        (0, globals_1.it)('should get order by user id', () => __awaiter(void 0, void 0, void 0, function* () {
-            const res = yield (0, supertest_1.default)(app_1.default)
-                .get('/order/testuser/search');
-            (0, globals_1.expect)(res.status).toBe(200);
-            (0, globals_1.expect)(res.body).toHaveProperty('orders');
-        }));
-    });
-    (0, globals_1.describe)('PUT /order/:id', () => {
-        (0, globals_1.it)('should update order', () => __awaiter(void 0, void 0, void 0, function* () {
-            const order = yield order_1.default.findOne({ user: 'testuser' });
-            if (!order) {
-                throw new Error('Order not found');
-            }
-            const res = yield (0, supertest_1.default)(app_1.default)
-                .put(`/order/${order._id}`)
-                .send({
-                status: "processing",
-                paymentMethod: "cash"
+    (0, mocha_1.describe)('GET /orders/:id', () => {
+        (0, mocha_1.it)('should get an order by id', () => __awaiter(void 0, void 0, void 0, function* () {
+            // Create an order
+            yield order_1.default.create({
+                userID: '123',
+                status: 'pending',
+                paymentMethod: 'card',
             });
-            (0, globals_1.expect)(res.status).toBe(200);
-            (0, globals_1.expect)(res.body).toHaveProperty('order');
-            (0, globals_1.expect)(res.body.order.total).toBe(200);
+            const res = yield request.get('/orders/123');
+            (0, chai_1.expect)(res.status).to.equal(200);
+            (0, chai_1.expect)(res.body.data.order.userID).to.equal('123');
+            (0, chai_1.expect)(res.body.data.order.status).to.equal('pending');
         }));
     });
-    (0, globals_1.describe)('PUT /order/:id/item', () => {
-        (0, globals_1.it)('should update order item', () => __awaiter(void 0, void 0, void 0, function* () {
-            const order = yield order_1.default.findOne({ user: 'testuser' });
-            if (!order) {
-                throw new Error('Order not found');
-            }
-            const res = yield (0, supertest_1.default)(app_1.default)
-                .put(`/order/${order._id}/item`)
-                .send({
-                product: 'testproduct',
-                quantity: 2
+    (0, mocha_1.describe)('GET /orders/search/:userID', () => {
+        (0, mocha_1.it)('should get all orders by user id', () => __awaiter(void 0, void 0, void 0, function* () {
+            // Create an order
+            yield order_1.default.create({
+                userID: '123',
+                status: 'pending',
+                paymentMethod: 'card',
             });
-            (0, globals_1.expect)(res.status).toBe(200);
-            (0, globals_1.expect)(res.body).toHaveProperty('order');
-            (0, globals_1.expect)(res.body.order.total).toBe(300);
+            const res = yield request.get('/orders/user/123');
+            (0, chai_1.expect)(res.status).to.equal(200);
+            (0, chai_1.expect)(res.body.data.orders).to.be.an('array');
+            (0, chai_1.expect)(res.body.data.orders[0].userID).to.equal('123');
+            (0, chai_1.expect)(res.body.data.orders[0].status).to.equal('pending');
         }));
     });
-    (0, globals_1.describe)('DELETE /order/:id', () => {
-        (0, globals_1.it)('should delete order by id', () => __awaiter(void 0, void 0, void 0, function* () {
-            const order = yield order_1.default.findOne({ user: 'testuser' });
-            if (!order) {
-                throw new Error('Order not found');
-            }
-            const res = yield (0, supertest_1.default)(app_1.default)
-                .delete(`/order/${order._id}`);
-            (0, globals_1.expect)(res.status).toBe(200);
-            (0, globals_1.expect)(res.body).toHaveProperty('deletedOrder');
-            (0, globals_1.expect)(res.body.deletedOrder.user).toHaveProperty('testuser');
+    (0, mocha_1.describe)('PUT /orders/:id', () => {
+        (0, mocha_1.it)('should update an order by id', () => __awaiter(void 0, void 0, void 0, function* () {
+            // Create an order
+            const order = yield order_1.default.create({
+                userID: '123',
+                status: 'pending',
+                paymentMethod: 'card',
+            });
+            const res = yield request.put(`/orders/${order._id}`).send({
+                status: 'shipped'
+            });
+            (0, chai_1.expect)(res.status).to.equal(200);
+            (0, chai_1.expect)(res.body.data.updatedOrder.status).to.equal('shipped');
         }));
     });
-    (0, globals_1.describe)('DELETE /order/:userID', () => {
-        (0, globals_1.it)('should delete order by user id', () => __awaiter(void 0, void 0, void 0, function* () {
-            const order = yield order_1.default.findOne({ userID: 'testuser' });
-            if (!order) {
-                throw new Error('Order not found');
-            }
-            const res = yield (0, supertest_1.default)(app_1.default)
-                .delete('/order/testuser');
-            (0, globals_1.expect)(res.status).toBe(200);
-            (0, globals_1.expect)(res.body).toHaveProperty('deletedOrders');
+    (0, mocha_1.describe)('PUT /orders/item/:id', () => {
+        (0, mocha_1.it)('should update an order item by id', () => __awaiter(void 0, void 0, void 0, function* () {
+            // Create an order
+            const order = yield order_1.default.create({
+                userID: '123',
+                status: 'pending',
+                paymentMethod: 'card',
+            });
+            const orderItem = yield orderItem_1.default.create({
+                productID: '789',
+                quantity: 2,
+                orderID: order._id
+            });
+            const res = yield request.put(`/orders/item/${orderItem._id}`).send({
+                quantity: 3
+            });
+            (0, chai_1.expect)(res.status).to.equal(200);
+            (0, chai_1.expect)(res.body.data.updatedItem.quantity).to.equal(3);
         }));
     });
-    (0, globals_1.describe)('DELETE /order/:id/item', () => {
-        (0, globals_1.it)('should delete order item by id', () => __awaiter(void 0, void 0, void 0, function* () {
-            const order = yield order_1.default.findOne({ user: 'testuser' });
-            if (!order) {
-                throw new Error('Order not found');
-            }
-            const item = yield orderItem_1.default.findOne({ orderID: order._id, product: 'testproduct' });
-            if (!item) {
-                throw new Error('Item not found');
-            }
-            const res = yield (0, supertest_1.default)(app_1.default)
-                .delete(`/order/${order._id}/item/${item._id}`);
-            (0, globals_1.expect)(res.status).toBe(200);
-            (0, globals_1.expect)(res.body).toHaveProperty('deletedItem');
-            (0, globals_1.expect)(res.body.deletedItem.product).toHaveProperty('testproduct');
+    (0, mocha_1.describe)('DELETE /orders/:id', () => {
+        (0, mocha_1.it)('should delete an order by id', () => __awaiter(void 0, void 0, void 0, function* () {
+            // Create an order
+            const order = yield order_1.default.create({
+                userID: '123',
+                status: 'pending',
+                paymentMethod: 'card',
+            });
+            const res = yield request.delete(`/orders/${order._id}`);
+            (0, chai_1.expect)(res.status).to.equal(200);
+            (0, chai_1.expect)(res.body.data.deletedOrder.userID).to.equal('123');
+            (0, chai_1.expect)(res.body.data.deletedOrder.status).to.equal('pending');
+        }));
+    });
+    (0, mocha_1.describe)('DELETE /orders/:userID', () => {
+        (0, mocha_1.it)('should delete all orders by user id', () => __awaiter(void 0, void 0, void 0, function* () {
+            // Create an order
+            yield order_1.default.create({
+                userID: '123',
+                status: 'pending',
+                paymentMethod: 'card',
+            });
+            const res = yield request.delete(`/orders/user/123`);
+            (0, chai_1.expect)(res.status).to.equal(200);
+            (0, chai_1.expect)(res.body.data.deletedOrders.userID).to.equal('123');
+            (0, chai_1.expect)(res.body.data.deletedOrders.status).to.equal('pending');
+        }));
+    });
+    (0, mocha_1.describe)('DELETE /orders/:id/item', () => {
+        (0, mocha_1.it)('should delete an order item by id', () => __awaiter(void 0, void 0, void 0, function* () {
+            // Create an order
+            const order = yield order_1.default.create({
+                userID: '123',
+                status: 'pending',
+                paymentMethod: 'card',
+            });
+            const orderItem = yield orderItem_1.default.create({
+                productID: '789',
+                quantity: 2,
+                orderID: order._id
+            });
+            const res = yield request.delete(`/orders/item/${orderItem._id}`);
+            (0, chai_1.expect)(res.status).to.equal(200);
+            (0, chai_1.expect)(res.body.data.deletedItem.productID).to.equal('789');
+            (0, chai_1.expect)(res.body.data.deletedItem.quantity).to.equal(2);
         }));
     });
 });

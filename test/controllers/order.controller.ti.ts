@@ -1,157 +1,174 @@
-import request from 'supertest';
 import app from '../../app';
-import { describe, it, expect, beforeAll } from '@jest/globals';
+import { describe, it, before, after, afterEach } from 'mocha';
+import { expect } from 'chai';
+import supertest from 'supertest';
+import mongoose from 'mongoose';
 import Order from '../../models/order';
 import OrderItem from '../../models/orderItem';
 
+const request = supertest(app);
+
 describe('Order Controller', () => {
-    beforeAll(async () => {
-        await Order.deleteMany({});
+    before(async () => {
+        // Connect to a test database
+        await mongoose.connect('mongodb://localhost/test');
+      });
+
+  after(async () => {
+    // Disconnect from the test database
+    await mongoose.disconnect();
+  });
+
+  afterEach(async () => {
+    // Clean up the database after each test
+    await Order.deleteMany({});
+  });
+
+  describe('POST /orders', () => {
+    it('should create a new order', async () => {
+      const res = await request.post('/orders').send({
+        userID: '123',
+        status: 'pending',
+        paymentMethod: 'card',
+      });
+
+      expect(res.status).to.equal(200);
+      expect(res.body.data.newOrder.userID).to.equal('123');
+      expect(res.body.data.newOrder.status).to.equal('pending');
     });
+  });
 
-    describe('POST /order', () => {
-        it('should create a new order', async () => {
-            const res = await request(app)
-                .post('/order')
-                .send({
-                    user: 'testuser',
-                    products: [
-                        {
-                            product: 'testproduct',
-                            quantity: 1
-                        }
-                    ],
-                    total: 100
-                });
+  describe('GET /orders/:id', () => {
+    it('should get an order by id', async () => {
+      // Create an order
+      await Order.create({
+        userID: '123',
+        status: 'pending',
+        paymentMethod: 'card',
+      });
 
-            expect(res.status).toBe(200);
-            expect(res.body).toHaveProperty('newOrder');
-            expect(res.body.newOrder.user).toHaveProperty('testuser');
+        const res = await request.get('/orders/123');
+
+        expect(res.status).to.equal(200);
+        expect(res.body.data.order.userID).to.equal('123');
+        expect(res.body.data.order.status).to.equal('pending');
+    });
+  });
+
+    describe('GET /orders/search/:userID', () => {
+        it('should get all orders by user id', async () => {
+        // Create an order
+        await Order.create({
+            userID: '123',
+            status: 'pending',
+            paymentMethod: 'card',
+        });
+    
+        const res = await request.get('/orders/user/123');
+    
+        expect(res.status).to.equal(200);
+        expect(res.body.data.orders).to.be.an('array');
+        expect(res.body.data.orders[0].userID).to.equal('123');
+        expect(res.body.data.orders[0].status).to.equal('pending');
         });
     });
 
-    describe('GET /order/:id', () => {
-        it('should get order by id', async () => {
-            const order = await Order.findOne({ user: 'testuser' });
+    describe('PUT /orders/:id', () => {
+        it('should update an order by id', async () => {
+        // Create an order
+        const order = await Order.create({
+            userID: '123',
+            status: 'pending',
+            paymentMethod: 'card',
+        });
 
-            if (!order) {
-                throw new Error('Order not found');
-            }
+        const res = await request.put(`/orders/${order._id}`).send({
+            status: 'shipped'
+        });
 
-            const res = await request(app)
-                .get(`/order/${order._id}`);
-
-            expect(res.status).toBe(200);
-            expect(res.body).toHaveProperty('order');
-            expect(res.body.order.user).toHaveProperty('testuser');
+        expect(res.status).to.equal(200);
+        expect(res.body.data.updatedOrder.status).to.equal('shipped');
         });
     });
 
-    describe('GET /order/search/:userID', () => {
-        it('should get order by user id', async () => {
-            const res = await request(app)
-                .get('/order/testuser/search');
+    describe('PUT /orders/item/:id', () => {
+        it('should update an order item by id', async () => {
+        // Create an order
+        const order = await Order.create({
+            userID: '123',
+            status: 'pending',
+            paymentMethod: 'card',
+        });
 
-            expect(res.status).toBe(200);
-            expect(res.body).toHaveProperty('orders');
+        const orderItem = await OrderItem.create({
+            productID: '789',
+            quantity: 2,
+            orderID: order._id
+        });
+
+        const res = await request.put(`/orders/item/${orderItem._id}`).send({
+            quantity: 3
+        });
+
+        expect(res.status).to.equal(200);
+        expect(res.body.data.updatedItem.quantity).to.equal(3);
         });
     });
 
-    describe('PUT /order/:id', () => {
-        it('should update order', async () => {
-            const order = await Order.findOne({ user: 'testuser' });
+    describe('DELETE /orders/:id', () => {
+        it('should delete an order by id', async () => {
+        // Create an order
+        const order = await Order.create({
+            userID: '123',
+            status: 'pending',
+            paymentMethod: 'card',
+        });
 
-            if (!order) {
-                throw new Error('Order not found');
-            }
+        const res = await request.delete(`/orders/${order._id}`);
 
-            const res = await request(app)
-                .put(`/order/${order._id}`)
-                .send({
-                    status: "processing",
-                    paymentMethod: "cash"
-                });
-
-            expect(res.status).toBe(200);
-            expect(res.body).toHaveProperty('order');
-            expect(res.body.order.total).toBe(200);
+        expect(res.status).to.equal(200);
+        expect(res.body.data.deletedOrder.userID).to.equal('123');
+        expect(res.body.data.deletedOrder.status).to.equal('pending');
         });
     });
 
-    describe('PUT /order/:id/item', () => {
-        it('should update order item', async () => {
-            const order = await Order.findOne({ user: 'testuser' });
+    describe('DELETE /orders/:userID', () => {
+        it('should delete all orders by user id', async () => {
+        // Create an order
+        await Order.create({
+            userID: '123',
+            status: 'pending',
+            paymentMethod: 'card',
+        });
 
-            if (!order) {
-                throw new Error('Order not found');
-            }
+        const res = await request.delete(`/orders/user/123`);
 
-            const res = await request(app)
-                .put(`/order/${order._id}/item`)
-                .send({
-                    product: 'testproduct',
-                    quantity: 2
-                });
-
-            expect(res.status).toBe(200);
-            expect(res.body).toHaveProperty('order');
-            expect(res.body.order.total).toBe(300);
+        expect(res.status).to.equal(200);
+        expect(res.body.data.deletedOrders.userID).to.equal('123');
+        expect(res.body.data.deletedOrders.status).to.equal('pending');
         });
     });
 
-    describe('DELETE /order/:id', () => {
-        it('should delete order by id', async () => {
-            const order = await Order.findOne({ user: 'testuser' });
+    describe('DELETE /orders/:id/item', () => {
+        it('should delete an order item by id', async () => {
+        // Create an order
+        const order = await Order.create({
+            userID: '123',
+            status: 'pending',
+            paymentMethod: 'card',
+        });
 
-            if (!order) {
-                throw new Error('Order not found');
-            }
+        const orderItem = await OrderItem.create({
+            productID: '789',
+            quantity: 2,
+            orderID: order._id
+        });
 
-            const res = await request(app)
-                .delete(`/order/${order._id}`);
+        const res = await request.delete(`/orders/item/${orderItem._id}`);
 
-            expect(res.status).toBe(200);
-            expect(res.body).toHaveProperty('deletedOrder');
-            expect(res.body.deletedOrder.user).toHaveProperty('testuser');
+        expect(res.status).to.equal(200);
+        expect(res.body.data.deletedItem.productID).to.equal('789');
+        expect(res.body.data.deletedItem.quantity).to.equal(2);
         });
     });
-
-    describe('DELETE /order/:userID', () => {
-        it('should delete order by user id', async () => {
-            const order = await Order.findOne({ userID: 'testuser' });
-            
-            if (!order) {
-                throw new Error('Order not found');
-            }
-
-            const res = await request(app)
-                .delete('/order/testuser');
-
-            expect(res.status).toBe(200);
-            expect(res.body).toHaveProperty('deletedOrders');
-        });
-    });
-
-    describe('DELETE /order/:id/item', () => {
-        it('should delete order item by id', async () => {
-            const order = await Order.findOne({ user: 'testuser' });
-
-            if (!order) {
-                throw new Error('Order not found');
-            }
-
-            const item = await OrderItem.findOne({ orderID: order._id, product: 'testproduct' });
-
-            if (!item) {
-                throw new Error('Item not found');
-            }
-
-            const res = await request(app)
-                .delete(`/order/${order._id}/item/${item._id}`);
-
-            expect(res.status).toBe(200);
-            expect(res.body).toHaveProperty('deletedItem');
-            expect(res.body.deletedItem.product).toHaveProperty('testproduct');
-        });
-    });
-})
+});

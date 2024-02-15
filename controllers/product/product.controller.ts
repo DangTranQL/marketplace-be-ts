@@ -6,6 +6,7 @@ interface ProductController {
   createProduct: (req: Request, res: Response, next: NextFunction) => Promise<void>;
   getProducts: (req: Request, res: Response, next: NextFunction) => Promise<void>;
   getProductById: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+  updateProductById: (req: Request, res: Response, next: NextFunction) => Promise<void>;
   deleteProductById: (req: Request, res: Response, next: NextFunction) => Promise<void>;
   deleteAllProducts: (req: Request, res: Response, next: NextFunction) => Promise<void>;
 }
@@ -88,6 +89,24 @@ const productController: ProductController = {
       throw new AppError(404, "Product not found", "Get Product Error");
     }
     sendResponse(res, 200, true, { product }, null, null);
+  }),
+
+  updateProductById: catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+    const { title, description, category, stocks, price, image } = req.body;
+    let product = await Product.findOne({ _id: id, isDeleted: false });
+    if (!product) {
+      throw new AppError(404, "Product not found", "Update Product Error");
+    }
+    product.title = title;
+    product.description = description;
+    product.category = category;
+    product.stocks = stocks;
+    product.price = price;
+    product.image = image;
+    await product.save();
+
+    sendResponse(res, 200, true, { product }, null, "Product updated");
   }),
 
   deleteProductById: catchAsync(async (req: Request, res: Response, next: NextFunction) => {

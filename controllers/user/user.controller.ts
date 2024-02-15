@@ -9,6 +9,7 @@ interface UserController {
   createUser: (req: Request, res: Response, next: NextFunction) => Promise<void>;
   getUsers: (req: Request, res: Response, next: NextFunction) => Promise<void>;
   getUserById: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+  updateUserById: (req: Request, res: Response, next: NextFunction) => Promise<void>;
   createOrderItem: (req: Request, res: Response, next: NextFunction) => Promise<void>;
   getOrder: (req: Request, res: Response, next: NextFunction) => Promise<void>;
   deleteUserById: (req: Request, res: Response, next: NextFunction) => Promise<void>;
@@ -72,6 +73,24 @@ const userController: UserController = {
       throw new AppError(404, "User not found", "Get User Error");
     }
     sendResponse(res, 200, true, { user }, null, null);
+  }),
+
+  updateUserById: catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+    const { username, email, password, role, address, phone } = req.body;
+    let user = await User.findOne({ _id: id, isDeleted: false });
+    if (!user) {
+      throw new AppError(404, "User not found", "Update User Error");
+    }
+    user.username = username;
+    user.email = email;
+    user.password = password;
+    user.role = role;
+    user.address = address;
+    user.phone = phone;
+    await user.save();
+
+    sendResponse(res, 200, true, { user }, null, "User updated");
   }),
 
   createOrderItem: catchAsync(async (req: Request, res: Response, next: NextFunction) => {

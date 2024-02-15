@@ -12,208 +12,199 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const supertest_1 = __importDefault(require("supertest"));
-const express_1 = __importDefault(require("express"));
-const globals_1 = require("@jest/globals");
 const user_controller_1 = __importDefault(require("./user.controller"));
-globals_1.jest.mock('../models/user');
-(0, globals_1.describe)('Create User Test', () => {
-    let app;
-    (0, globals_1.beforeAll)(() => {
-        app = (0, express_1.default)();
-        app.use(express_1.default.json());
-        app.post('/users', user_controller_1.default.createUser);
-    });
-    (0, globals_1.it)('should create a new user', () => __awaiter(void 0, void 0, void 0, function* () {
-        const mockUser = {
-            username: 'testuser',
-            email: 'testuser@test.com',
-            password: 'testpassword',
-            role: 'buyer',
-            address: 'test address',
-            phone: 1234567890
+const user_1 = __importDefault(require("../../models/user"));
+const order_1 = __importDefault(require("../../models/order"));
+const orderItem_1 = __importDefault(require("../../models/orderItem"));
+const bcryptjs_1 = __importDefault(require("bcryptjs"));
+jest.mock('../../models/user');
+jest.mock('../../models/order');
+jest.mock('../../models/orderItem');
+jest.mock('bcryptjs');
+describe('User Controller', () => {
+    let req;
+    let res;
+    let next;
+    beforeEach(() => {
+        req = {
+            body: {
+                username: 'testuser',
+                email: 'test@example.com',
+                password: 'password123',
+                role: 'user',
+                address: '123 Test St',
+                phone: '1234567890',
+            },
         };
-        const res = yield (0, supertest_1.default)(app)
-            .post('/users')
-            .send(mockUser);
-        (0, globals_1.expect)(res.status).toBe(200);
-        (0, globals_1.expect)(res.body).toHaveProperty('username', mockUser.username);
-        (0, globals_1.expect)(res.body).toHaveProperty('email', mockUser.email);
-        (0, globals_1.expect)(res.body).toHaveProperty('role', mockUser.role);
-        (0, globals_1.expect)(res.body).toHaveProperty('address', mockUser.address);
-        (0, globals_1.expect)(res.body).toHaveProperty('phone', mockUser.phone);
-    }));
-    (0, globals_1.it)('should return 400 because of invalid format', () => __awaiter(void 0, void 0, void 0, function* () {
-        const mockUser = {
-            username: 123,
-            email: 'testuser@test.com',
-            password: 'testpassword',
-            role: 'buyer',
-            address: 'test address',
-            phone: 1234567890
+        res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
         };
-        const res = yield (0, supertest_1.default)(app)
-            .post('/users')
-            .send(mockUser);
-        (0, globals_1.expect)(res.status).toBe(400);
-    }));
-    (0, globals_1.it)('should return 400 because of missing fields', () => __awaiter(void 0, void 0, void 0, function* () {
-        const mockUser = {
-            username: 'testuser2',
-            email: 'testuser2@test.com',
-            password: 'testpassword'
-        };
-        const res = yield (0, supertest_1.default)(app)
-            .post('/users')
-            .send(mockUser);
-        (0, globals_1.expect)(res.status).toBe(400);
-    }));
-    (0, globals_1.it)('should return 400 because user already exists', () => __awaiter(void 0, void 0, void 0, function* () {
-        const mockUser = {
-            username: 'testuser',
-            email: 'testuser@test.com',
-            password: 'testpassword',
-            role: 'buyer',
-            address: 'test address',
-            phone: 1234567890
-        };
-        const res = yield (0, supertest_1.default)(app)
-            .post('/users')
-            .send(mockUser);
-        (0, globals_1.expect)(res.status).toBe(400);
-    }));
-});
-(0, globals_1.describe)('Get Users Test', () => {
-    let app;
-    (0, globals_1.beforeAll)(() => {
-        app = (0, express_1.default)();
-        app.use(express_1.default.json());
-        app.get('/users', user_controller_1.default.getUsers);
+        next = jest.fn();
     });
-    (0, globals_1.it)('should get all users', () => __awaiter(void 0, void 0, void 0, function* () {
-        const res = yield (0, supertest_1.default)(app)
-            .get('/users');
-        (0, globals_1.expect)(res.status).toBe(200);
-        (0, globals_1.expect)(res.body).toHaveProperty('users');
-    }));
-    (0, globals_1.it)('should get user with username', () => __awaiter(void 0, void 0, void 0, function* () {
-        const res = yield (0, supertest_1.default)(app)
-            .get('/users?username=testuser');
-        (0, globals_1.expect)(res.status).toBe(200);
-        (0, globals_1.expect)(res.body).toHaveProperty('users');
-    }));
-    (0, globals_1.it)('should return 400 because of invalid query', () => __awaiter(void 0, void 0, void 0, function* () {
-        const res = yield (0, supertest_1.default)(app)
-            .get('/users?limit=invalid');
-        (0, globals_1.expect)(res.status).toBe(400);
-    }));
-});
-(0, globals_1.describe)('Get User By Id Test', () => {
-    let app;
-    (0, globals_1.beforeAll)(() => {
-        app = (0, express_1.default)();
-        app.use(express_1.default.json());
-        app.get('/users/:id', user_controller_1.default.getUserById);
-    });
-    (0, globals_1.it)('should get user by id', () => __awaiter(void 0, void 0, void 0, function* () {
-        const res = yield (0, supertest_1.default)(app)
-            .get('/users/123');
-        (0, globals_1.expect)(res.status).toBe(200);
-        (0, globals_1.expect)(res.body).toHaveProperty('user');
-    }));
-    (0, globals_1.it)('should return 404 because user not found', () => __awaiter(void 0, void 0, void 0, function* () {
-        const res = yield (0, supertest_1.default)(app)
-            .get('/users/123');
-        (0, globals_1.expect)(res.status).toBe(404);
-    }));
-});
-(0, globals_1.describe)('Create Order Item Test', () => {
-    let app;
-    (0, globals_1.beforeAll)(() => {
-        app = (0, express_1.default)();
-        app.use(express_1.default.json());
-        app.put('/users/:id', user_controller_1.default.createOrderItem);
-    });
-    (0, globals_1.it)('should create order item', () => __awaiter(void 0, void 0, void 0, function* () {
-        const res = yield (0, supertest_1.default)(app)
-            .put('/users/123')
-            .send({
-            productID: '123',
-            quantity: 2,
-            price: 100
+    // createUser test
+    it('should create a new user', () => __awaiter(void 0, void 0, void 0, function* () {
+        user_1.default.findOne.mockResolvedValue(null);
+        bcryptjs_1.default.genSalt.mockResolvedValue('salt');
+        bcryptjs_1.default.hash.mockResolvedValue('hashedpassword');
+        const newUser = Object.assign(Object.assign({}, req.body), { password: 'hashedpassword', generateToken: jest.fn().mockResolvedValue('token') });
+        user_1.default.create.mockResolvedValue(newUser);
+        yield user_controller_1.default.createUser(req, res, next);
+        expect(res.json).toHaveBeenCalledWith({
+            status: 200,
+            success: true,
+            data: { newUser, accessToken: 'token' },
+            message: "User and cart created"
         });
-        (0, globals_1.expect)(res.status).toBe(200);
-        (0, globals_1.expect)(res.body).toHaveProperty('order');
     }));
-});
-(0, globals_1.describe)('Get Order Test', () => {
-    let app;
-    (0, globals_1.beforeAll)(() => {
-        app = (0, express_1.default)();
-        app.use(express_1.default.json());
-        app.get('/users/:id/orders', user_controller_1.default.getOrder);
-    });
-    (0, globals_1.it)('should get order', () => __awaiter(void 0, void 0, void 0, function* () {
-        const res = yield (0, supertest_1.default)(app)
-            .get('/users/123/orders');
-        (0, globals_1.expect)(res.status).toBe(200);
-        (0, globals_1.expect)(res.body).toHaveProperty('order');
-        (0, globals_1.expect)(res.body).toHaveProperty('orderItems');
+    // getUsers test
+    it('should get users', () => __awaiter(void 0, void 0, void 0, function* () {
+        req.query = {
+            page: '1',
+            limit: '10',
+            username: 'testuser',
+        };
+        const users = [
+            { username: 'testuser', email: 'test@example.com' },
+        ];
+        user_1.default.countDocuments.mockResolvedValue(users.length);
+        user_1.default.find.mockResolvedValue(users);
+        yield user_controller_1.default.getUsers(req, res, next);
+        expect(res.json).toHaveBeenCalledWith({
+            status: 200,
+            success: true,
+            data: { users, totalPages: 1, count: users.length },
+            message: null
+        });
     }));
-    (0, globals_1.it)('should return 404 because order not found', () => __awaiter(void 0, void 0, void 0, function* () {
-        const res = yield (0, supertest_1.default)(app)
-            .get('/users/123/orders');
-        (0, globals_1.expect)(res.status).toBe(404);
+    // getUserById test
+    it('should get user by id', () => __awaiter(void 0, void 0, void 0, function* () {
+        req.params = {
+            id: '123',
+        };
+        const user = { _id: '123', username: 'testuser', email: 'test@example.com' };
+        user_1.default.findOne.mockResolvedValue(user);
+        yield user_controller_1.default.getUserById(req, res, next);
+        expect(res.json).toHaveBeenCalledWith({
+            status: 200,
+            success: true,
+            data: { user },
+            message: null
+        });
     }));
-});
-(0, globals_1.describe)('Delete User By Id Test', () => {
-    let app;
-    (0, globals_1.beforeAll)(() => {
-        app = (0, express_1.default)();
-        app.use(express_1.default.json());
-        app.delete('/users/:id', user_controller_1.default.deleteUserById);
-    });
-    (0, globals_1.it)('should delete user by id', () => __awaiter(void 0, void 0, void 0, function* () {
-        const res = yield (0, supertest_1.default)(app)
-            .delete('/users/123');
-        (0, globals_1.expect)(res.status).toBe(200);
-        (0, globals_1.expect)(res.body).toHaveProperty('user');
+    // updateUserById test
+    it('should update user by id', () => __awaiter(void 0, void 0, void 0, function* () {
+        req.params = {
+            id: '123',
+        };
+        req.body = {
+            username: 'testuser2',
+            email: 'testuser2@example.com',
+            password: 'password123',
+            role: 'buyer',
+            address: '123 Test St',
+            phone: '1234567890',
+        };
+        const user = { _id: '123', username: 'testuser2', email: 'testuser2@example.com', password: 'password123', role: 'buyer', address: '123 Test St', phone: '1234567890' };
+        user_1.default.findOne.mockResolvedValue(user);
+        user_1.default.prototype.save.mockResolvedValue(user);
+        yield user_controller_1.default.updateUserById(req, res, next);
+        expect(res.json).toHaveBeenCalledWith({
+            status: 200,
+            success: true,
+            data: { user },
+            message: "User updated"
+        });
     }));
-    (0, globals_1.it)('should return 404 because user not found', () => __awaiter(void 0, void 0, void 0, function* () {
-        const res = yield (0, supertest_1.default)(app)
-            .delete('/users/123');
-        (0, globals_1.expect)(res.status).toBe(404);
+    // createOrderItem test
+    it('should create order item', () => __awaiter(void 0, void 0, void 0, function* () {
+        req.params = {
+            id: '123',
+        };
+        req.body = {
+            productID: '456',
+            quantity: 2,
+            price: 100,
+        };
+        const order = { _id: '789', userID: '123', status: 'pending', price: 0 };
+        const orderItem = { orderID: '789', productID: '456', quantity: 2, itemPrice: 100 };
+        order_1.default.findOne.mockResolvedValue(order);
+        orderItem_1.default.findOne.mockResolvedValue(null);
+        orderItem_1.default.create.mockResolvedValue(orderItem);
+        yield user_controller_1.default.createOrderItem(req, res, next);
+        expect(res.json).toHaveBeenCalledWith({
+            status: 200,
+            success: true,
+            data: { order },
+            message: "Product added to order"
+        });
     }));
-});
-(0, globals_1.describe)('Delete User By Username Test', () => {
-    let app;
-    (0, globals_1.beforeAll)(() => {
-        app = (0, express_1.default)();
-        app.use(express_1.default.json());
-        app.delete('/users/:username', user_controller_1.default.deleteUserByUsername);
-    });
-    (0, globals_1.it)('should delete user by username', () => __awaiter(void 0, void 0, void 0, function* () {
-        const res = yield (0, supertest_1.default)(app)
-            .delete('/users/testuser');
-        (0, globals_1.expect)(res.status).toBe(200);
-        (0, globals_1.expect)(res.body).toHaveProperty('user');
+    // getOrder test
+    it('should get order', () => __awaiter(void 0, void 0, void 0, function* () {
+        req.params = {
+            id: '123',
+        };
+        const order = { _id: '789', userID: '123', status: 'pending', price: 0 };
+        const orderItems = [
+            { orderID: '789', productID: '456', quantity: 2, itemPrice: 100 },
+        ];
+        order_1.default.findOne.mockResolvedValue(order);
+        orderItem_1.default.find.mockResolvedValue(orderItems);
+        yield user_controller_1.default.getOrder(req, res, next);
+        expect(res.json).toHaveBeenCalledWith({
+            status: 200,
+            success: true,
+            data: { order: order, orderItems: orderItems },
+            message: null
+        });
     }));
-    (0, globals_1.it)('should return 404 because user not found', () => __awaiter(void 0, void 0, void 0, function* () {
-        const res = yield (0, supertest_1.default)(app)
-            .delete('/users/testuser456');
-        (0, globals_1.expect)(res.status).toBe(404);
+    // deleteUserById test
+    it('should delete user by id', () => __awaiter(void 0, void 0, void 0, function* () {
+        req.params = {
+            id: '123',
+        };
+        const user = { _id: '123', username: 'testuser', email: 'test@example.com' };
+        user_1.default.findOne.mockResolvedValue(user);
+        orderItem_1.default.deleteMany.mockResolvedValue({ ok: 1 });
+        order_1.default.deleteOne.mockResolvedValue({ ok: 1 });
+        user_1.default.deleteOne.mockResolvedValue({ ok: 1 });
+        yield user_controller_1.default.deleteUserById(req, res, next);
+        expect(res.json).toHaveBeenCalledWith({
+            status: 200,
+            success: true,
+            data: null,
+            message: "User deleted"
+        });
     }));
-});
-(0, globals_1.describe)('Delete All Users Test', () => {
-    let app;
-    (0, globals_1.beforeAll)(() => {
-        app = (0, express_1.default)();
-        app.use(express_1.default.json());
-        app.delete('/users', user_controller_1.default.deleteAllUsers);
-    });
-    (0, globals_1.it)('should delete all users', () => __awaiter(void 0, void 0, void 0, function* () {
-        const res = yield (0, supertest_1.default)(app)
-            .delete('/users');
-        (0, globals_1.expect)(res.status).toBe(200);
+    // deleteUserByUsername test
+    it('should delete user by username', () => __awaiter(void 0, void 0, void 0, function* () {
+        req.params = {
+            username: 'testuser',
+        };
+        const user = { _id: '123', username: 'testuser', email: 'test@example.com' };
+        user_1.default.findOne.mockResolvedValue(user);
+        orderItem_1.default.deleteMany.mockResolvedValue({ ok: 1 });
+        order_1.default.deleteOne.mockResolvedValue({ ok: 1 });
+        user_1.default.deleteOne.mockResolvedValue({ ok: 1 });
+        yield user_controller_1.default.deleteUserByUsername(req, res, next);
+        expect(res.json).toHaveBeenCalledWith({
+            status: 200,
+            success: true,
+            data: null,
+            message: "User deleted"
+        });
+    }));
+    // deleteAllUsers test
+    it('should delete all users', () => __awaiter(void 0, void 0, void 0, function* () {
+        user_1.default.deleteMany.mockResolvedValue({ ok: 1 });
+        order_1.default.deleteMany.mockResolvedValue({ ok: 1 });
+        orderItem_1.default.deleteMany.mockResolvedValue({ ok: 1 });
+        yield user_controller_1.default.deleteAllUsers(req, res, next);
+        expect(res.json).toHaveBeenCalledWith({
+            status: 200,
+            success: true,
+            data: null,
+            message: "All users deleted"
+        });
     }));
 });

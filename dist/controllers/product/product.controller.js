@@ -53,6 +53,24 @@ const productController = {
                 category: { $regex: filter.category, $options: "i" },
             });
         }
+        if (filter.min && filter.max) {
+            filterCondition.push({
+                isDeleted: false,
+                price: { $gte: parseInt(filter.min), $lte: parseInt(filter.max) },
+            });
+        }
+        else if (filter.min) {
+            filterCondition.push({
+                isDeleted: false,
+                price: { $gte: parseInt(filter.min) },
+            });
+        }
+        else if (filter.max) {
+            filterCondition.push({
+                isDeleted: false,
+                price: { $lte: parseInt(filter.max) },
+            });
+        }
         const filterCriteria = filterCondition.length ? { $and: filterCondition } : {};
         const count = yield product_1.default.countDocuments(filterCriteria);
         const totalPages = Math.ceil(count / limit);
@@ -67,6 +85,22 @@ const productController = {
             throw new utils_1.AppError(404, "Product not found", "Get Product Error");
         }
         (0, utils_1.sendResponse)(res, 200, true, { product }, null, null);
+    })),
+    updateProductById: (0, utils_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+        const { id } = req.params;
+        const { title, description, category, stocks, price, image } = req.body;
+        let product = yield product_1.default.findOne({ _id: id, isDeleted: false });
+        if (!product) {
+            throw new utils_1.AppError(404, "Product not found", "Update Product Error");
+        }
+        product.title = title;
+        product.description = description;
+        product.category = category;
+        product.stocks = stocks;
+        product.price = price;
+        product.image = image;
+        yield product.save();
+        (0, utils_1.sendResponse)(res, 200, true, { product }, null, "Product updated");
     })),
     deleteProductById: (0, utils_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         const { id } = req.params;

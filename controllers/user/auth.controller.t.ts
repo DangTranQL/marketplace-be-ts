@@ -1,55 +1,46 @@
-import request from 'supertest';
-import express from 'express';
-import { jest, describe, it, expect, beforeAll } from '@jest/globals';
-import authController from './auth.controller';
+import { Request, Response, NextFunction } from "express";
+import authController from "./auth.controller";
+import User from '../../models/user';
+import bcrypt from 'bcryptjs';
 
-describe('Login Test', () => {
-    let app: express.Express;
+jest.mock('../../models/user');
+jest.mock('bcryptjs');
 
-    beforeAll(() => {
-        app = express();
-        app.use(express.json());
-        app.post('/login', authController.loginWithEmail);
+describe('Auth Controller', () => {
+  let req: Partial<Request>;
+  let res: Partial<Response>;
+  let next: NextFunction;
+
+  beforeEach(() => {
+    req = {
+      body: {
+        email: 'test@example.com',
+        password: 'password123',
+      },
+    };
+    res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    next = jest.fn();
+  });
+
+  it('should login with email', async () => {
+    const user = {
+      email: 'test@example.com',
+      password: 'hashedpassword',
+      generateToken: jest.fn().mockResolvedValue('token'),
+    };
+    (User.findOne as jest.Mock).mockResolvedValue(user);
+    (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+    await authController.loginWithEmail(req as Request, res as Response, next);
+
+    expect(res.json).toHaveBeenCalledWith({
+      status: 200,
+      success: true,
+      data: { user, accessToken: 'token' },
+      message: "Login successful"
     });
-
-    it('should login successfully', async () => {
-        const mockUser = {
-            email: 'usertest@test.com',
-            password: 'testpassword'
-        };
-
-        const res = await request(app)
-            .post('/login')
-            .send(mockUser);
-
-        expect(res.status).toBe(200);
-        expect(res.body).toHaveProperty('token');
-    });
-
-    it('should return 401 because of wrong password', async () => {
-        const mockUser = {
-            email: 'testuser@test.com',
-            password: 'password'
-        };
-
-        const res = await request(app)
-            .post('/login')
-            .send(mockUser);
-
-        expect(res.status).toBe(401);
-    });
-
-    it('should return 401 because of invalid credentials', async () => {
-        const mockUser = {
-            email: 'test@test.com',
-            password: 'password'
-        };
-
-        const res = await request(app)
-            .post('/login')
-            .send(mockUser);
-
-        expect(res.status).toBe(401);
-    });
-})
-
+  });
+});

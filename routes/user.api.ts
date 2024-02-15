@@ -11,7 +11,9 @@ router.get("/:id", validateId, userController.getUserById);
 
 router.get("/:id/orders", validateId, userController.getOrder);
 
-router.put("/:id", validateId, userController.createOrderItem);
+router.put("/:id", validateId, userController.updateUserById);
+
+router.put("/:id/orders", validateId, userController.createOrderItem);
 
 router.delete("/:id", validateId, userController.deleteUserById);
 

@@ -12,91 +12,122 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const supertest_1 = __importDefault(require("supertest"));
 const app_1 = __importDefault(require("../../app"));
-const globals_1 = require("@jest/globals");
+const mocha_1 = require("mocha");
+const chai_1 = require("chai");
+const supertest_1 = __importDefault(require("supertest"));
+const mongoose_1 = __importDefault(require("mongoose"));
 const product_1 = __importDefault(require("../../models/product"));
-(0, globals_1.describe)('Product Controller', () => {
-    (0, globals_1.beforeAll)(() => __awaiter(void 0, void 0, void 0, function* () {
+const request = (0, supertest_1.default)(app_1.default);
+(0, mocha_1.describe)('Product Controller', () => {
+    (0, mocha_1.before)(() => __awaiter(void 0, void 0, void 0, function* () {
+        // Connect to a test database
+        yield mongoose_1.default.connect('mongodb://localhost/test');
+    }));
+    (0, mocha_1.after)(() => __awaiter(void 0, void 0, void 0, function* () {
+        // Disconnect from the test database
+        yield mongoose_1.default.disconnect();
+    }));
+    (0, mocha_1.afterEach)(() => __awaiter(void 0, void 0, void 0, function* () {
+        // Clean up the database after each test
         yield product_1.default.deleteMany({});
     }));
-    (0, globals_1.describe)('POST /product', () => {
-        (0, globals_1.it)('should create a new product', () => __awaiter(void 0, void 0, void 0, function* () {
-            const res = yield (0, supertest_1.default)(app_1.default)
-                .post('/product')
-                .send({
+    (0, mocha_1.describe)('POST /products', () => {
+        (0, mocha_1.it)('should create a new product', () => __awaiter(void 0, void 0, void 0, function* () {
+            const res = yield request.post('/products').send({
                 name: 'testproduct',
-                description: 'testdescription',
-                price: 100,
-                stock: 100
+                description: 'test description',
+                price: 10.99,
+                category: 'test category',
+                stocks: 10,
+                image: 'testimage'
             });
-            (0, globals_1.expect)(res.status).toBe(200);
-            (0, globals_1.expect)(res.body).toHaveProperty('newProduct');
-            (0, globals_1.expect)(res.body.newProduct.name).toHaveProperty('testproduct');
+            (0, chai_1.expect)(res.status).to.equal(200);
+            (0, chai_1.expect)(res.body.data.newProduct.name).to.equal('testproduct');
+            (0, chai_1.expect)(res.body.data.newProduct.description).to.equal('test description');
         }));
     });
-    (0, globals_1.describe)('GET /product', () => {
-        (0, globals_1.it)('should get products', () => __awaiter(void 0, void 0, void 0, function* () {
-            const res = yield (0, supertest_1.default)(app_1.default)
-                .get('/product');
-            (0, globals_1.expect)(res.status).toBe(200);
-            (0, globals_1.expect)(res.body).toHaveProperty('products');
-        }));
-        (0, globals_1.it)('should get product by title', () => __awaiter(void 0, void 0, void 0, function* () {
-            const res = yield (0, supertest_1.default)(app_1.default)
-                .get('/product?title=testproduct');
-            (0, globals_1.expect)(res.status).toBe(200);
-            (0, globals_1.expect)(res.body).toHaveProperty('products');
-            (0, globals_1.expect)(res.body.products[0].name).toHaveProperty('testproduct');
-        }));
-        (0, globals_1.it)('should get product by category', () => __awaiter(void 0, void 0, void 0, function* () {
-            const res = yield (0, supertest_1.default)(app_1.default)
-                .get('/product?category=testcategory');
-            (0, globals_1.expect)(res.status).toBe(200);
-            (0, globals_1.expect)(res.body).toHaveProperty('products');
+    (0, mocha_1.describe)('GET /products', () => {
+        (0, mocha_1.it)('should get all products', () => __awaiter(void 0, void 0, void 0, function* () {
+            // Create a product
+            yield product_1.default.create({
+                name: 'testproduct',
+                description: 'test description',
+                price: 10.99,
+                category: 'test category',
+                stocks: 10,
+                image: 'testimage'
+            });
+            const res = yield request.get('/products');
+            (0, chai_1.expect)(res.status).to.equal(200);
+            (0, chai_1.expect)(res.body.data.products).to.be.an('array');
+            (0, chai_1.expect)(res.body.data.products[0].name).to.equal('testproduct');
         }));
     });
-    (0, globals_1.describe)('GET /product/:id', () => {
-        (0, globals_1.it)('should get product by id', () => __awaiter(void 0, void 0, void 0, function* () {
-            const product = yield product_1.default.findOne({ name: 'testproduct' });
-            if (!product) {
-                throw new Error('Product not found');
-            }
-            const res = yield (0, supertest_1.default)(app_1.default)
-                .get(`/product/${product._id}`);
-            (0, globals_1.expect)(res.status).toBe(200);
-            (0, globals_1.expect)(res.body).toHaveProperty('product');
-            (0, globals_1.expect)(res.body.product.name).toHaveProperty('testproduct');
+    (0, mocha_1.describe)('GET /products/:id', () => {
+        (0, mocha_1.it)('should get a product by id', () => __awaiter(void 0, void 0, void 0, function* () {
+            // Create a product
+            const product = yield product_1.default.create({
+                name: 'testproduct',
+                description: 'test description',
+                price: 10.99,
+                category: 'test category',
+                stocks: 10,
+                image: 'testimage'
+            });
+            const res = yield request.get(`/products/${product._id}`);
+            (0, chai_1.expect)(res.status).to.equal(200);
+            (0, chai_1.expect)(res.body.data.product.name).to.equal('testproduct');
         }));
     });
-    (0, globals_1.describe)('DELETE /product/:id', () => {
-        (0, globals_1.it)('should delete product by id', () => __awaiter(void 0, void 0, void 0, function* () {
-            const product = yield product_1.default.findOne({ name: 'testproduct' });
-            if (!product) {
-                throw new Error('Product not found');
-            }
-            const res = yield (0, supertest_1.default)(app_1.default)
-                .delete(`/product/${product._id}`);
-            (0, globals_1.expect)(res.status).toBe(200);
-            (0, globals_1.expect)(res.body).toHaveProperty('deletedProduct');
-            (0, globals_1.expect)(res.body.deletedProduct.name).toHaveProperty('testproduct');
+    (0, mocha_1.describe)('PUT /products/:id', () => {
+        (0, mocha_1.it)('should update a product by id', () => __awaiter(void 0, void 0, void 0, function* () {
+            // Create a product
+            const product = yield product_1.default.create({
+                name: 'testproduct',
+                description: 'test description',
+                price: 14.00,
+                category: 'test category',
+                stocks: 10,
+                image: 'testimage'
+            });
+            const res = yield request.put(`/products/${product._id}`).send({
+                price: 15.00
+            });
+            (0, chai_1.expect)(res.status).to.equal(200);
+            (0, chai_1.expect)(res.body.data.product.price).to.equal(15.00);
         }));
     });
-    (0, globals_1.describe)('DELETE /product/:title', () => {
-        (0, globals_1.it)('should delete product by title', () => __awaiter(void 0, void 0, void 0, function* () {
-            const res = yield (0, supertest_1.default)(app_1.default)
-                .delete('/product/testproduct');
-            (0, globals_1.expect)(res.status).toBe(200);
-            (0, globals_1.expect)(res.body).toHaveProperty('deletedProduct');
-            (0, globals_1.expect)(res.body.deletedProduct.name).toHaveProperty('testproduct');
+    (0, mocha_1.describe)('DELETE /products/:id', () => {
+        (0, mocha_1.it)('should delete a product by id', () => __awaiter(void 0, void 0, void 0, function* () {
+            // Create a product
+            const product = yield product_1.default.create({
+                name: 'testproduct',
+                description: 'test description',
+                price: 14.00,
+                category: 'test category',
+                stocks: 10,
+                image: 'testimage'
+            });
+            const res = yield request.delete(`/products/${product._id}`);
+            (0, chai_1.expect)(res.status).to.equal(200);
+            (0, chai_1.expect)(res.body.data.product.isDeleted).to.equal(true);
         }));
     });
-    (0, globals_1.describe)('DELETE /product', () => {
-        (0, globals_1.it)('should delete all products', () => __awaiter(void 0, void 0, void 0, function* () {
-            const res = yield (0, supertest_1.default)(app_1.default)
-                .delete('/product');
-            (0, globals_1.expect)(res.status).toBe(200);
-            (0, globals_1.expect)(res.body).toHaveProperty('products');
+    (0, mocha_1.describe)('DELETE /products', () => {
+        (0, mocha_1.it)('should delete all products', () => __awaiter(void 0, void 0, void 0, function* () {
+            // Create a product
+            yield product_1.default.create({
+                name: 'testproduct',
+                description: 'test description',
+                price: 14.00,
+                category: 'test category',
+                stocks: 10,
+                image: 'testimage'
+            });
+            const res = yield request.delete(`/products`);
+            (0, chai_1.expect)(res.status).to.equal(200);
+            (0, chai_1.expect)(res.body.data.products).to.equal(1);
         }));
     });
 });

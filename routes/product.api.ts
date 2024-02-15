@@ -9,6 +9,8 @@ router.get("/", productController.getProducts);
 
 router.get("/:id", validateId, productController.getProductById);
 
+router.put("/:id", validateId, productController.updateProductById);
+
 router.delete("/:id", validateId, productController.deleteProductById);
 
 router.delete("/", productController.deleteAllProducts)

@@ -23,7 +23,7 @@ const orderItemController = {
             throw new utils_1.AppError(400, "Item already exists", "Create Item Error");
         }
         let newItem = yield orderItem_1.default.create({ orderID, productID, quantity, itemPrice });
-        (0, utils_1.sendResponse)(res, 200, true, { item: newItem }, null, "Item created");
+        (0, utils_1.sendResponse)(res, 200, true, { newItem }, null, "Item created");
     })),
     getAllItems: (0, utils_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         let { id } = req.params;
