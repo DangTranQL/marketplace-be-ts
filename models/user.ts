@@ -23,7 +23,7 @@ const userSchema: Schema<IUser> = new Schema(
         username: { type: String, required: true, trim: true, minlength: 3, unique: true },
         email: { type: String, required: true, trim: true, unique: true },
         password: { type: String, required: true, trim: true },
-        role: { type: String, required: true, trim: true },
+        role: { type: String, enum: ["buyer", "seller"], required: true },
         address: { type: String, required: true, trim: true },
         phone: { type: Number, required: true, trim: true },
         isDeleted: { type: Boolean, default: false },

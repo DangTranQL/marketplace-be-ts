@@ -30,7 +30,7 @@ describe('User Controller', () => {
         username: 'testuser',
         email: 'testuser@example.com',
         password: 'password',
-        role: 'user',
+        role: 'buyer',
         address: '123 Test St',
         phone: '1234567890'
       });
@@ -48,7 +48,7 @@ describe('User Controller', () => {
         username: 'testuser',
         email: 'testuser@example.com',
         password: 'password',
-        role: 'user',
+        role: 'buyer',
         address: '123 Test St',
         phone: '1234567890'
       });
@@ -69,7 +69,7 @@ describe('User Controller', () => {
             username: 'testuser',
             email: 'testuser@example.com',
             password: 'password',
-            role: 'user',
+            role: 'buyer',
             address: '123 Test St',
             phone: '1234567890'
         });
@@ -89,7 +89,7 @@ describe('User Controller', () => {
             username: 'testuser',
             email: 'testuser@example.com',
             password: 'password',
-            role: 'user',
+            role: 'buyer',
             address: '123 Test St',
             phone: '1234567890'
         });
@@ -116,7 +116,7 @@ describe('User Controller', () => {
             username: 'testuser',
             email: 'testuser@example.com',
             password: 'password',
-            role: 'user',
+            role: 'buyer',
             address: '123 Test St',
             phone: '1234567890'
         });
@@ -140,7 +140,7 @@ describe('User Controller', () => {
             username: 'testuser',
             email: 'testuser@example.com',
             password: 'password',
-            role: 'user',
+            role: 'buyer',
             address: '123 Test St',
             phone: '1234567890'
         });
@@ -167,7 +167,7 @@ describe('User Controller', () => {
             username: 'testuser',
             email: 'testuser@example.com',
             password: 'password',
-            role: 'user',
+            role: 'buyer',
             address: '123 Test St',
             phone: '1234567890'
         });
@@ -186,7 +186,7 @@ describe('User Controller', () => {
             username: 'testuser',
             email: 'testuser@example.com',
             password: 'password',
-            role: 'user',
+            role: 'buyer',
             address: '123 Test St',
             phone: '1234567890'
         });
@@ -205,7 +205,7 @@ describe('User Controller', () => {
             username: 'testuser',
             email: 'testuser@example.com',
             password: 'password',
-            role: 'user',
+            role: 'buyer',
             address: '123 Test St',
             phone: '1234567890'
         });

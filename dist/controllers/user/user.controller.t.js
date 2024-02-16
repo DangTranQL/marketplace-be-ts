@@ -31,7 +31,7 @@ describe('User Controller', () => {
                 username: 'testuser',
                 email: 'test@example.com',
                 password: 'password123',
-                role: 'user',
+                role: 'buyer',
                 address: '123 Test St',
                 phone: '1234567890',
             },

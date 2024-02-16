@@ -1,8 +1,7 @@
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
-import { beforeAll, afterAll, afterEach } from "@jest/globals";
 
-let mongod;
+let mongod: MongoMemoryServer;
 
 beforeAll(async () => {
     mongod = await MongoMemoryServer.create();

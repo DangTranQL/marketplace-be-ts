@@ -39,7 +39,7 @@ const request = (0, supertest_1.default)(app_1.default);
                 username: 'testuser',
                 email: 'testuser@example.com',
                 password: 'password',
-                role: 'user',
+                role: 'buyer',
                 address: '123 Test St',
                 phone: '1234567890'
             });
@@ -55,7 +55,7 @@ const request = (0, supertest_1.default)(app_1.default);
                 username: 'testuser',
                 email: 'testuser@example.com',
                 password: 'password',
-                role: 'user',
+                role: 'buyer',
                 address: '123 Test St',
                 phone: '1234567890'
             });
@@ -73,7 +73,7 @@ const request = (0, supertest_1.default)(app_1.default);
                 username: 'testuser',
                 email: 'testuser@example.com',
                 password: 'password',
-                role: 'user',
+                role: 'buyer',
                 address: '123 Test St',
                 phone: '1234567890'
             });
@@ -90,7 +90,7 @@ const request = (0, supertest_1.default)(app_1.default);
                 username: 'testuser',
                 email: 'testuser@example.com',
                 password: 'password',
-                role: 'user',
+                role: 'buyer',
                 address: '123 Test St',
                 phone: '1234567890'
             });
@@ -114,7 +114,7 @@ const request = (0, supertest_1.default)(app_1.default);
                 username: 'testuser',
                 email: 'testuser@example.com',
                 password: 'password',
-                role: 'user',
+                role: 'buyer',
                 address: '123 Test St',
                 phone: '1234567890'
             });
@@ -135,7 +135,7 @@ const request = (0, supertest_1.default)(app_1.default);
                 username: 'testuser',
                 email: 'testuser@example.com',
                 password: 'password',
-                role: 'user',
+                role: 'buyer',
                 address: '123 Test St',
                 phone: '1234567890'
             });
@@ -158,7 +158,7 @@ const request = (0, supertest_1.default)(app_1.default);
                 username: 'testuser',
                 email: 'testuser@example.com',
                 password: 'password',
-                role: 'user',
+                role: 'buyer',
                 address: '123 Test St',
                 phone: '1234567890'
             });
@@ -174,7 +174,7 @@ const request = (0, supertest_1.default)(app_1.default);
                 username: 'testuser',
                 email: 'testuser@example.com',
                 password: 'password',
-                role: 'user',
+                role: 'buyer',
                 address: '123 Test St',
                 phone: '1234567890'
             });
@@ -190,7 +190,7 @@ const request = (0, supertest_1.default)(app_1.default);
                 username: 'testuser',
                 email: 'testuser@example.com',
                 password: 'password',
-                role: 'user',
+                role: 'buyer',
                 address: '123 Test St',
                 phone: '1234567890'
             });
