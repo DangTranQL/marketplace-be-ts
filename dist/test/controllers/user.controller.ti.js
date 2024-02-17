@@ -120,8 +120,10 @@ const request = (0, supertest_1.default)(app_1.default);
             });
             const res = yield request.post('/users/123/orders').send({
                 productID: '123',
+                title: 'Test Product',
                 quantity: 2,
-                price: 100
+                itemPrice: 100,
+                image: 'testimage'
             });
             (0, chai_1.expect)(res.status).to.equal(200);
             (0, chai_1.expect)(res.body.data.order.userID).to.equal('123');

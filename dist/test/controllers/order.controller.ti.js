@@ -99,8 +99,11 @@ const request = (0, supertest_1.default)(app_1.default);
             });
             const orderItem = yield orderItem_1.default.create({
                 productID: '789',
+                title: 'testproduct',
                 quantity: 2,
-                orderID: order._id
+                orderID: order._id,
+                itemPrice: 100,
+                image: 'testimage'
             });
             const res = yield request.put(`/orders/item/${orderItem._id}`).send({
                 quantity: 3
@@ -147,8 +150,11 @@ const request = (0, supertest_1.default)(app_1.default);
             });
             const orderItem = yield orderItem_1.default.create({
                 productID: '789',
+                title: 'testproduct',
                 quantity: 2,
-                orderID: order._id
+                orderID: order._id,
+                itemPrice: 100,
+                image: 'testimage'
             });
             const res = yield request.delete(`/orders/item/${orderItem._id}`);
             (0, chai_1.expect)(res.status).to.equal(200);

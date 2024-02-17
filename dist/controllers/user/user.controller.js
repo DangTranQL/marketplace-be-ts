@@ -87,7 +87,7 @@ const userController = {
     })),
     createOrderItem: (0, utils_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         const { id } = req.params;
-        const { productID, quantity, price } = req.body;
+        const { productID, title, quantity, price, image } = req.body;
         let order = yield order_1.default.findOne({ userID: id, status: "pending", isDeleted: false });
         if (!order) {
             order = yield order_1.default.create({ userID: id, status: "pending", price: 0 });
@@ -98,7 +98,7 @@ const userController = {
             item.quantity += quantity;
         }
         else {
-            yield orderItem_1.default.create({ orderID: order._id, productID: productID, quantity: quantity, itemPrice: price });
+            yield orderItem_1.default.create({ orderID: order._id, productID: productID, title: title, quantity: quantity, itemPrice: price, image: image });
             orderPrice += price * quantity;
         }
         order.price = orderPrice;

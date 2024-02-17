@@ -102,8 +102,11 @@ describe('Order Controller', () => {
 
         const orderItem = await OrderItem.create({
             productID: '789',
+            title: 'testproduct',
             quantity: 2,
-            orderID: order._id
+            orderID: order._id,
+            itemPrice: 100,
+            image: 'testimage'
         });
 
         const res = await request.put(`/orders/item/${orderItem._id}`).send({
@@ -160,8 +163,11 @@ describe('Order Controller', () => {
 
         const orderItem = await OrderItem.create({
             productID: '789',
+            title: 'testproduct',
             quantity: 2,
-            orderID: order._id
+            orderID: order._id,
+            itemPrice: 100,
+            image: 'testimage'
         });
 
         const res = await request.delete(`/orders/item/${orderItem._id}`);

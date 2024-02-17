@@ -95,7 +95,7 @@ const userController: UserController = {
 
   createOrderItem: catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
-    const { productID, quantity, price } = req.body;
+    const { productID, title, quantity, price, image } = req.body;
     let order = await Order.findOne({ userID: id, status: "pending", isDeleted: false });
     if (!order) {
       order = await Order.create({ userID: id, status: "pending", price: 0 });
@@ -106,7 +106,7 @@ const userController: UserController = {
     if (item) {
       item.quantity += quantity;
     } else {
-      await OrderItem.create({ orderID: order._id, productID: productID, quantity: quantity, itemPrice: price });
+      await OrderItem.create({ orderID: order._id, productID: productID, title: title, quantity: quantity, itemPrice: price, image: image});
       orderPrice += price * quantity;
     }
 

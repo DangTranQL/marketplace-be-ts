@@ -123,8 +123,10 @@ describe('User Controller', () => {
         };
         req.body = {
             productID: '456',
+            title: 'testproduct',
             quantity: 2,
             price: 100,
+            image: 'testimage'
         };
         const order = { _id: '789', userID: '123', status: 'pending', price: 0 };
         const orderItem = { orderID: '789', productID: '456', quantity: 2, itemPrice: 100 };

@@ -16,13 +16,13 @@ const utils_1 = require("../../helpers/utils");
 const orderItem_1 = __importDefault(require("../../models/orderItem"));
 const orderItemController = {
     createItem: (0, utils_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-        const { orderID, productID, quantity, itemPrice } = req.body;
+        const { orderID, productID, title, quantity, itemPrice, image } = req.body;
         // check if item already exists
         let checkItem = yield orderItem_1.default.findOne({ productID, isDeleted: false });
         if (checkItem) {
             throw new utils_1.AppError(400, "Item already exists", "Create Item Error");
         }
-        let newItem = yield orderItem_1.default.create({ orderID, productID, quantity, itemPrice });
+        let newItem = yield orderItem_1.default.create({ orderID, productID, title, quantity, itemPrice, image });
         (0, utils_1.sendResponse)(res, 200, true, { newItem }, null, "Item created");
     })),
     getAllItems: (0, utils_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {

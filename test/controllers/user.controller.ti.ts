@@ -123,8 +123,10 @@ describe('User Controller', () => {
 
         const res = await request.post('/users/123/orders').send({
             productID: '123',
+            title: 'Test Product',
             quantity: 2,
-            price: 100
+            itemPrice: 100,
+            image: 'testimage'
         });
 
         expect(res.status).to.equal(200);
