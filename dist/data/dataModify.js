@@ -22,22 +22,36 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const mongoose_1 = __importStar(require("mongoose"));
-const productSchema = new mongoose_1.Schema({
-    title: { type: String, required: true, trim: true, minlength: 3, unique: true },
-    description: { type: String, required: true, trim: true, minlength: 3 },
-    category: { type: String, enum: ['Electronics', 'Clothing', 'Medicine', 'Food', 'Others'], required: true, trim: true, minlength: 3 },
-    stocks: { type: Number, required: true, trim: true },
-    price: { type: Number, required: true, trim: true, unique: true },
-    image: { type: String, required: true, trim: true, minlength: 3 },
-    sold: { type: Number, default: 0 },
-    totalRating: { type: Number, default: 0 },
-    totalReview: { type: Number, default: 0 },
-    isDeleted: { type: Boolean, default: false },
-}, {
-    timestamps: true,
-    collection: "products",
+const fs = __importStar(require("fs"));
+const csv_parser_1 = __importDefault(require("csv-parser"));
+const csv_writer_1 = require("csv-writer");
+// Define the path of your CSV file
+const csvFilePath = 'data/sample_data.csv';
+// Define the new columns
+const newColumns = ['sold', 'totalRating', 'totalReview'];
+// Read and parse the CSV file
+let data = [];
+fs.createReadStream(csvFilePath)
+    .pipe((0, csv_parser_1.default)())
+    .on('data', (row) => {
+    // Add new columns to each row
+    newColumns.forEach((col) => {
+        row[col] = 0;
+    });
+    data.push(row);
+})
+    .on('end', () => {
+    // Define the CSV writer
+    const csvWriter = (0, csv_writer_1.createObjectCsvWriter)({
+        path: csvFilePath,
+        header: Object.keys(data[0]).map((id) => ({ id, title: id })),
+    });
+    // Write the updated data back to the CSV file
+    csvWriter
+        .writeRecords(data)
+        .then(() => console.log('The CSV file was updated successfully.'));
 });
-const Product = mongoose_1.default.model("Product", productSchema);
-exports.default = Product;

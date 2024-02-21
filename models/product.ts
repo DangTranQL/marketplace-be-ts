@@ -7,6 +7,9 @@ interface IProduct extends Document {
   stocks: number;
   price: number;
   image: string;
+  sold: number;
+  totalRating: number;
+  totalReview: number;
   isDeleted: boolean;
 }
 
@@ -20,6 +23,9 @@ const productSchema: Schema<IProduct> = new Schema(
     stocks: { type: Number, required: true, trim: true },
     price: { type: Number, required: true, trim: true, unique: true },
     image: { type: String, required: true, trim: true, minlength: 3 },
+    sold: { type: Number, default: 0 },
+    totalRating: { type: Number, default: 0 },
+    totalReview: { type: Number, default: 0 },
     isDeleted: { type: Boolean, default: false },
   },
   {
