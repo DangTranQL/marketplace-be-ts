@@ -61,6 +61,10 @@ const userController = {
         let users = yield user_1.default.find(filterCriteria).sort({ createdAt: -1 }).skip(offset).limit(limit);
         (0, utils_1.sendResponse)(res, 200, true, { users, totalPages, count }, null, null);
     })),
+    getCurrentUser: (0, utils_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+        const user = req.userId;
+        (0, utils_1.sendResponse)(res, 200, true, { user }, null, null);
+    })),
     getUserById: (0, utils_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         const { id } = req.params;
         let user = yield user_1.default.findOne({ _id: id, isDeleted: false });

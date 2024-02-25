@@ -4,10 +4,12 @@ import bcrypt from "bcryptjs";
 import User from "../../models/user";
 import Order from "../../models/order";
 import OrderItem from "../../models/orderItem";
+import { get } from "mongoose";
 
 interface UserController {
   createUser: (req: Request, res: Response, next: NextFunction) => Promise<void>;
   getUsers: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+  getCurrentUser: (req: Request, res: Response, next: NextFunction) => Promise<void>;
   getUserById: (req: Request, res: Response, next: NextFunction) => Promise<void>;
   updateUserById: (req: Request, res: Response, next: NextFunction) => Promise<void>;
   createOrderItem: (req: Request, res: Response, next: NextFunction) => Promise<void>;
@@ -64,6 +66,11 @@ const userController: UserController = {
     let users = await User.find(filterCriteria).sort({ createdAt: -1 }).skip(offset).limit(limit);
 
     sendResponse(res, 200, true, { users, totalPages, count }, null, null);
+  }),
+
+  getCurrentUser: catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.userId;
+    sendResponse(res, 200, true, { user }, null, null);
   }),
 
   getUserById: catchAsync(async (req: Request, res: Response, next: NextFunction) => {

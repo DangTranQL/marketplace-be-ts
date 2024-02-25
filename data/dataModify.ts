@@ -6,7 +6,8 @@ import { createObjectCsvWriter as createCsvWriter } from 'csv-writer';
 const csvFilePath = 'data/sample_data.csv';
 
 // Define the new columns
-const newColumns = ['sold', 'totalRating', 'totalReview'];
+// const newColumns = ['sold', 'totalRating', 'totalReview'];
+const newColumns = ['isDeleted'];
 
 // Read and parse the CSV file
 let data: { [key: string]: string | number }[] = [];
@@ -15,7 +16,7 @@ fs.createReadStream(csvFilePath)
   .on('data', (row) => {
     // Add new columns to each row
     newColumns.forEach((col) => {
-      row[col] = 0;
+      row[col] = false;
     });
     data.push(row);
   })
