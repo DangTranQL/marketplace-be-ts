@@ -126,9 +126,10 @@ const userController: UserController = {
     const { id } = req.params;
     let order = await Order.findOne({ userID: id, status: "pending", isDeleted: false });
     if (!order) {
-      throw new AppError(404, "Order not found", "Get Order Error");
+      sendResponse(res, 200, true, {order: null, orderItems: null}, null, "User has no order");
+      return;
     }
-    let orderItems = await OrderItem.find({ orderID: order._id });
+    let orderItems = await OrderItem.find({ orderID: order._id, isDeleted: false});
     let response = {
       order: order,
       orderItems: orderItems,

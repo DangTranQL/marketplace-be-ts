@@ -113,9 +113,10 @@ const userController = {
         const { id } = req.params;
         let order = yield order_1.default.findOne({ userID: id, status: "pending", isDeleted: false });
         if (!order) {
-            throw new utils_1.AppError(404, "Order not found", "Get Order Error");
+            (0, utils_1.sendResponse)(res, 200, true, { order: null, orderItems: null }, null, "User has no order");
+            return;
         }
-        let orderItems = yield orderItem_1.default.find({ orderID: order._id });
+        let orderItems = yield orderItem_1.default.find({ orderID: order._id, isDeleted: false });
         let response = {
             order: order,
             orderItems: orderItems,
