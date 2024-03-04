@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const utils_1 = require("../../helpers/utils");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const user_1 = __importDefault(require("../../models/user"));
+const generateToken_1 = require("../../helpers/generateToken");
 const authController = {
     loginWithEmail: (0, utils_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         const { email, password } = req.body;
@@ -26,7 +27,8 @@ const authController = {
         if (!isMatch) {
             throw new utils_1.AppError(400, "Incorrect Password!", "Login Error");
         }
-        const accessToken = yield user.generateToken();
+        const accessToken = yield (0, generateToken_1.generateToken)(user);
+        console.log("authcontrol_TOKEN", accessToken);
         (0, utils_1.sendResponse)(res, 200, true, { user, accessToken }, null, "Login successful");
     })),
 };

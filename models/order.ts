@@ -20,8 +20,8 @@ const orderSchema: Schema<IOrder> = new Schema(
       default: "pending",
     },
     price: { type: Number, required: true, trim: true, minlength: 3, default: 0},
-    paymentMethod: { type: String, optional: true, trim: true, minlength: 3 },
-    isDeleted: { type: Boolean, default: false },
+    paymentMethod: { type: String, optional: true, trim: true, minlength: 3, default: "none"},
+    // items: [{ type: Schema.Types.ObjectId, optional: true }],
   },
   {
     timestamps: true,

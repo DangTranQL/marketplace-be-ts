@@ -11,6 +11,4 @@ router.post("/", validation_1.validateCreateProduct, product_controller_1.defaul
 router.get("/", product_controller_1.default.getProducts);
 router.get("/:id", validation_1.validateId, product_controller_1.default.getProductById);
 router.put("/:id", validation_1.validateId, product_controller_1.default.updateProductById);
-router.delete("/:id", validation_1.validateId, product_controller_1.default.deleteProductById);
-router.delete("/", product_controller_1.default.deleteAllProducts);
 exports.default = router;

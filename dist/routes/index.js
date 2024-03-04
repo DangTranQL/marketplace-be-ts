@@ -14,7 +14,7 @@ router.get("/", (req, res) => {
     res.send("E-Shop");
 });
 /* User API */
-router.use("/users", user_api_1.default);
+router.use("/user", user_api_1.default);
 /* Auth API */
 router.use("/login", auth_api_1.default);
 /* Product API */

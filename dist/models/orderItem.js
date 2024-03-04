@@ -31,7 +31,6 @@ const orderItemSchema = new mongoose_1.Schema({
     quantity: { type: Number, required: true, trim: true, minlength: 1 },
     itemPrice: { type: Number, required: true, trim: true, minlength: 1 },
     image: { type: String, required: true, trim: true, minlength: 3 },
-    isDeleted: { type: Boolean, default: false },
 }, {
     timestamps: true,
     collection: 'orderitems',

@@ -11,7 +11,7 @@ router.get("/", (req, res) => {
 });
 
 /* User API */
-router.use("/users", userAPI);
+router.use("/user", userAPI);
 
 /* Auth API */
 router.use("/login", authAPI);

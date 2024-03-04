@@ -34,7 +34,6 @@ const productSchema = new mongoose_1.Schema({
     sold: { type: Number, default: 0 },
     totalRating: { type: Number, default: 0 },
     totalReview: { type: Number, default: 0 },
-    isDeleted: { type: Boolean, default: false },
 }, {
     timestamps: true,
     collection: "products",

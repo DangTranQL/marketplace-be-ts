@@ -29,7 +29,7 @@ const productController = {
     createProduct: (0, utils_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         const { title, description, category, stocks, price, image } = req.body;
         // check if product already exists
-        let checkProduct = yield product_1.default.findOne({ title: title, isDeleted: false });
+        let checkProduct = yield product_1.default.findOne({ title: title });
         if (checkProduct) {
             throw new utils_1.AppError(400, "Product already exists", "Create Product Error");
         }
@@ -43,31 +43,26 @@ const productController = {
         let filterCondition = [];
         if (filter.title) {
             filterCondition.push({
-                isDeleted: false,
                 title: { $regex: filter.title, $options: "i" },
             });
         }
         if (filter.category) {
             filterCondition.push({
-                isDeleted: false,
                 category: { $regex: filter.category, $options: "i" },
             });
         }
         if (filter.min && filter.max) {
             filterCondition.push({
-                isDeleted: false,
                 price: { $gte: parseInt(filter.min), $lte: parseInt(filter.max) },
             });
         }
         else if (filter.min) {
             filterCondition.push({
-                isDeleted: false,
                 price: { $gte: parseInt(filter.min) },
             });
         }
         else if (filter.max) {
             filterCondition.push({
-                isDeleted: false,
                 price: { $lte: parseInt(filter.max) },
             });
         }
@@ -80,7 +75,7 @@ const productController = {
     })),
     getProductById: (0, utils_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         const { id } = req.params;
-        let product = yield product_1.default.findOne({ _id: id, isDeleted: false });
+        let product = yield product_1.default.findOne({ _id: id });
         if (!product) {
             throw new utils_1.AppError(404, "Product not found", "Get Product Error");
         }
@@ -89,7 +84,7 @@ const productController = {
     updateProductById: (0, utils_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         const { id } = req.params;
         const { title, description, category, stocks, price, image } = req.body;
-        let product = yield product_1.default.findOne({ _id: id, isDeleted: false });
+        let product = yield product_1.default.findOne({ _id: id });
         if (!product) {
             throw new utils_1.AppError(404, "Product not found", "Update Product Error");
         }
@@ -101,22 +96,6 @@ const productController = {
         product.image = image;
         yield product.save();
         (0, utils_1.sendResponse)(res, 200, true, { product }, null, "Product updated");
-    })),
-    deleteProductById: (0, utils_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-        const { id } = req.params;
-        let product = yield product_1.default.findOne({ _id: id, isDeleted: false });
-        if (!product) {
-            throw new utils_1.AppError(404, "Product not found", "Delete Product Error");
-        }
-        else {
-            product.isDeleted = true;
-            yield product.save();
-        }
-        (0, utils_1.sendResponse)(res, 200, true, null, null, "Product deleted");
-    })),
-    deleteAllProducts: (0, utils_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-        yield product_1.default.deleteMany({});
-        (0, utils_1.sendResponse)(res, 200, true, null, null, "All products deleted");
     })),
 };
 exports.default = productController;

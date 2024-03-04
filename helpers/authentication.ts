@@ -6,6 +6,7 @@ const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY as string;
 export const loginRequired = (req: any, res: any, next: any) => {
     try {
         const tokenString = req.headers.authorization;
+        console.log("TOKENSTRING", tokenString)
         if (!tokenString) {
             throw new AppError(401, "Unauthorized", "Login Required");
         }

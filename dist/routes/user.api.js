@@ -9,13 +9,8 @@ const user_controller_1 = __importDefault(require("../controllers/user/user.cont
 const validation_1 = require("../helpers/validation");
 const authentication_1 = require("../helpers/authentication");
 router.post("/", validation_1.validateCreateUser, user_controller_1.default.createUser);
-router.get("/", user_controller_1.default.getUsers);
 router.get("/me", authentication_1.loginRequired, user_controller_1.default.getCurrentUser);
 router.get("/:id", validation_1.validateId, user_controller_1.default.getUserById);
-router.get("/:id/orders", validation_1.validateId, user_controller_1.default.getOrder);
 router.put("/:id", validation_1.validateId, user_controller_1.default.updateUserById);
-router.put("/:id/orders", validation_1.validateId, user_controller_1.default.createOrderItem);
-router.delete("/:id", validation_1.validateId, user_controller_1.default.deleteUserById);
-router.delete("/:username", user_controller_1.default.deleteUserByUsername);
-router.delete("/", user_controller_1.default.deleteAllUsers);
+router.put("/me", authentication_1.loginRequired, user_controller_1.default.updateCurrentUser);
 exports.default = router;

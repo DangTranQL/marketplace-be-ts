@@ -10,7 +10,6 @@ interface IUser extends Document {
   role: string;
   address: string;
   phone: number;
-  isDeleted: boolean;
 
   generateToken: () => Promise<string>;
   toJSON: () => IUser;
@@ -26,7 +25,6 @@ const userSchema: Schema<IUser> = new Schema(
         role: { type: String, enum: ["buyer", "seller"], required: true },
         address: { type: String, required: true, trim: true },
         phone: { type: Number, required: true, trim: true },
-        isDeleted: { type: Boolean, default: false },
     },
     {
         timestamps: true,
@@ -37,16 +35,7 @@ const userSchema: Schema<IUser> = new Schema(
 userSchema.methods.toJSON = function () {
 	const user = this._doc;
 	delete user.password;
-	delete user.isDeleted;
 	return user;
-}
-
-userSchema.methods.generateToken = async function () {
-    if (!JWT_SECRET_KEY) {
-        throw new Error("JWT_SECRET_KEY is not defined");
-    }
-	const accessToken = await jwt.sign({ _id: this._id }, JWT_SECRET_KEY, { expiresIn: "1d" });
-	return accessToken;
 }
 
 const User: UserModel = mongoose.model<IUser, UserModel>("User", userSchema);

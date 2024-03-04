@@ -2,21 +2,26 @@ import express from "express";
 const router = express.Router();
 import orderController from "../controllers/order/order.controller";
 import { validateCreateOrder, validateId, validateUserID } from "../helpers/validation";
+import { loginRequired } from "../helpers/authentication";
 
-router.post("/", validateCreateOrder, orderController.createOrder);
+router.post("/", validateCreateOrder, loginRequired, orderController.createOrder);
 
-router.get("/:id", validateId, orderController.getOrderById);
+router.post("/:id/item", validateId, loginRequired, orderController.createItem);
 
-router.get("/search/:userID", validateUserID, orderController.getOrderByUserId);
+router.get("/:id", validateId, loginRequired, orderController.getOrderById);
 
-router.put("/:id", validateId, orderController.updateOrder);
+router.get("/user/:userID", validateUserID, loginRequired, orderController.getOrdersByUserId);
 
-router.put("/item/:id", validateId, orderController.updateItem);
+router.post("/addCart", loginRequired, orderController.addToCart);
 
-router.delete("/:id", validateId, orderController.deleteOrderById);
+router.get("/:id/item/:itemid", loginRequired, orderController.getOrderItemById);
 
-router.delete("/:userID", validateUserID, orderController.deleteOrderByUserId);
+router.patch("/:id", validateId, loginRequired, orderController.updateOrder);
 
-router.delete("/:id/item", validateId, orderController.deleteItemById);
+router.patch("/:id/item/:itemid", loginRequired, orderController.updateItem);
+
+router.delete("/:id", validateId, loginRequired, orderController.deleteOrderById);
+
+router.delete("/:id/item", validateId, loginRequired, orderController.deleteItemById);
 
 export default router;

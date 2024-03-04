@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { sendResponse, AppError, catchAsync } from "../../helpers/utils";
 import bcrypt from 'bcryptjs';
 import User from '../../models/user';
+import { generateToken } from '../../helpers/generateToken';
 
 interface AuthController {
   loginWithEmail: (req: Request, res: Response, next: NextFunction) => Promise<void>;
@@ -21,7 +22,8 @@ const authController: AuthController = {
       throw new AppError(400, "Incorrect Password!", "Login Error");
     }
 
-    const accessToken = await user.generateToken();
+    const accessToken = await generateToken(user);
+    console.log("authcontrol_TOKEN", accessToken);
     sendResponse(res, 200, true, { user, accessToken }, null, "Login successful");
   }),
 };
