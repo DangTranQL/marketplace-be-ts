@@ -7,8 +7,6 @@ import { generateToken } from "../../helpers/generateToken";
 interface UserController {
   createUser: (req: Request, res: Response, next: NextFunction) => Promise<void>;
   getCurrentUser: (req: Request, res: Response, next: NextFunction) => Promise<void>;
-  getUserById: (req: Request, res: Response, next: NextFunction) => Promise<void>;
-  updateUserById: (req: Request, res: Response, next: NextFunction) => Promise<void>;
   updateCurrentUser: (req: Request, res: Response, next: NextFunction) => Promise<void>;
 }
 
@@ -35,16 +33,7 @@ const userController: UserController = {
   getCurrentUser: catchAsync(async (req: any, res: Response, next: NextFunction) => {
     const userId = req.userId;
     const user = await User.findOne({ _id: userId });
-    sendResponse(res, 200, true, { user }, null, null);
-  }),
-
-  getUserById: catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const { id } = req.params;
-    let user = await User.findOne({ _id: id });
-    if (!user) {
-      throw new AppError(404, "User not found", "Get User Error");
-    }
-    sendResponse(res, 200, true, { user }, null, null);
+    sendResponse(res, 200, true, user, null, null);
   }),
 
   updateCurrentUser: catchAsync(async (req: any, res: Response, next: NextFunction) => {
@@ -58,21 +47,6 @@ const userController: UserController = {
     user.address = address;
     user.phone = phone;
     await user.save();
-    sendResponse(res, 200, true, { user }, null, "User updated");
-  }),
-
-  updateUserById: catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const { id } = req.params;
-    const { username, address, phone } = req.body;
-    let user = await User.findOne({ _id: id });
-    if (!user) {
-      throw new AppError(404, "User not found", "Update User Error");
-    }
-    user.username = username;
-    user.address = address;
-    user.phone = phone;
-    await user.save();
-
     sendResponse(res, 200, true, { user }, null, "User updated");
   }),
 };

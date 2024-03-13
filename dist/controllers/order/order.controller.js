@@ -8,6 +8,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -15,6 +26,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const utils_1 = require("../../helpers/utils");
 const order_1 = __importDefault(require("../../models/order"));
 const orderItem_1 = __importDefault(require("../../models/orderItem"));
+const product_1 = __importDefault(require("../../models/product"));
 const orderController = {
     createOrder: (0, utils_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         const { userID, status } = req.body;
@@ -39,24 +51,39 @@ const orderController = {
         yield order.save();
         (0, utils_1.sendResponse)(res, 200, true, { order }, null, "Item created");
     })),
+    getOrdersOfCurrentUser: (0, utils_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+        const userID = req.userId;
+        let _a = Object.assign({}, req.query), { page = '1', limit = '10' } = _a, filter = __rest(_a, ["page", "limit"]);
+        page = parseInt(page) || 1;
+        limit = parseInt(limit) || 10;
+        const filterConditions = [{ userID: userID }];
+        if (filter.status) {
+            filterConditions.push({
+                status: { $regex: filter.status, $options: "i" },
+            });
+        }
+        const filterCriteria = filterConditions.length > 0 ? { $and: filterConditions } : {};
+        const count = yield order_1.default.countDocuments(filterCriteria);
+        const totalPage = Math.ceil(count / limit);
+        const offset = (page - 1) * limit;
+        let order = yield order_1.default.find(filterCriteria).sort({ createdAt: -1 }).skip(offset).limit(limit);
+        (0, utils_1.sendResponse)(res, 200, true, { order, totalPage, count }, null, null);
+    })),
+    getAllOrders: (0, utils_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+        const userID = req.userId;
+        console.log(userID);
+        const pendingOrder = yield order_1.default.find({ status: "pending", userID });
+        const pastOrders = yield order_1.default.find({ status: "completed", userID });
+        (0, utils_1.sendResponse)(res, 200, true, { pendingOrder, pastOrders }, null, null);
+    })),
     getOrderById: (0, utils_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         const { id } = req.params;
         let order = yield order_1.default.findOne({ _id: id });
         if (!order) {
             throw new utils_1.AppError(404, "Order not found", "Get Order Error");
         }
-        let orderItems = yield orderItem_1.default.find({ orderID: order._id });
-        (0, utils_1.sendResponse)(res, 200, true, { orderItems }, null, "Get Order by Id successful");
-    })),
-    getOrdersByUserId: (0, utils_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-        const userID = req.userId;
-        let order = yield order_1.default.findOne({ userID: userID });
-        if (!order) {
-            (0, utils_1.sendResponse)(res, 200, true, { order: null, orderItems: null }, null, "No orders");
-            return;
-        }
-        let orderItems = yield orderItem_1.default.find({ orderID: order._id });
-        (0, utils_1.sendResponse)(res, 200, true, { order, orderItems }, null, "Get Order by User Id successful");
+        let orderItems = yield orderItem_1.default.find({ orderID: id });
+        (0, utils_1.sendResponse)(res, 200, true, { order, orderItems }, null, "Get Order by Id successful");
     })),
     addToCart: (0, utils_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         const userId = req.userId;
@@ -95,11 +122,23 @@ const orderController = {
         if (!order) {
             throw new utils_1.AppError(404, "Order not found", "Update Order Error");
         }
+        if (status === "completed") {
+            let orderItems = yield orderItem_1.default.find({ orderID: id });
+            for (let i = 0; i < orderItems.length; i++) {
+                let product = yield product_1.default.findOne({ _id: orderItems[i].productID });
+                if (!product) {
+                    throw new utils_1.AppError(404, "Product not found", "Update Order Error");
+                }
+                product.stocks -= orderItems[i].quantity;
+                product.sold += orderItems[i].quantity;
+                yield (product === null || product === void 0 ? void 0 : product.save());
+            }
+        }
         (0, utils_1.sendResponse)(res, 200, true, { order }, null, "Order updated");
     })),
     updateItem: (0, utils_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         const { id, itemid } = req.params;
-        const { newQuantity } = req.body;
+        const { change } = req.body;
         let order = yield order_1.default.findOne({ _id: id, status: "pending" });
         if (!order) {
             throw new utils_1.AppError(404, "Order not found", "Update Item Error");
@@ -108,13 +147,11 @@ const orderController = {
         if (!item) {
             throw new utils_1.AppError(404, "Item not found", "Update Item Error");
         }
-        order.price -= item.itemPrice * item.quantity;
+        order.price += item.itemPrice;
         yield order.save();
-        item.quantity = newQuantity;
+        item.quantity += change;
         yield item.save();
-        order.price += item.itemPrice * item.quantity;
-        yield order.save();
-        (0, utils_1.sendResponse)(res, 200, true, { order }, null, "Item updated");
+        (0, utils_1.sendResponse)(res, 200, true, { order, item }, null, "Item updated");
     })),
     deleteOrderById: (0, utils_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         const { id } = req.params;

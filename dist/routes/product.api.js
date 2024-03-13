@@ -9,6 +9,6 @@ const product_controller_1 = __importDefault(require("../controllers/product/pro
 const validation_1 = require("../helpers/validation");
 router.post("/", validation_1.validateCreateProduct, product_controller_1.default.createProduct);
 router.get("/", product_controller_1.default.getProducts);
-router.get("/:id", validation_1.validateId, product_controller_1.default.getProductById);
+router.get("/:id", product_controller_1.default.getProductById);
 router.put("/:id", validation_1.validateId, product_controller_1.default.updateProductById);
 exports.default = router;

@@ -15,7 +15,7 @@ const orderSchema: Schema<IOrder> = new Schema(
     userID: { type: String, required: true, trim: true, minlength: 3 },
     status: {
       type: String,
-      enum: ["pending", "processing", "shipped", "received"],
+      enum: ["pending", "completed"],
       required: true,
       default: "pending",
     },

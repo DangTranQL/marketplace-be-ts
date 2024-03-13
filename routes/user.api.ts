@@ -8,10 +8,6 @@ router.post("/", validateCreateUser, userController.createUser);
 
 router.get("/me", loginRequired, userController.getCurrentUser);
 
-router.get("/:id", validateId, userController.getUserById);
-
-router.put("/:id", validateId, userController.updateUserById);
-
 router.put("/me", loginRequired, userController.updateCurrentUser);
 
 export default router;

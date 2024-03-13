@@ -51,31 +51,44 @@ const productController = {
                 category: { $regex: filter.category, $options: "i" },
             });
         }
-        if (filter.min && filter.max) {
-            filterCondition.push({
-                price: { $gte: parseInt(filter.min), $lte: parseInt(filter.max) },
-            });
-        }
-        else if (filter.min) {
-            filterCondition.push({
-                price: { $gte: parseInt(filter.min) },
-            });
-        }
-        else if (filter.max) {
-            filterCondition.push({
-                price: { $lte: parseInt(filter.max) },
-            });
-        }
+        // if (filter.min && filter.max) {
+        //   filterCondition.push({
+        //     price: { $gte: parseInt(filter.min as string), $lte: parseInt(filter.max as string) },
+        //   });
+        // }
+        // else if (filter.min) {
+        //   filterCondition.push({
+        //     price: { $gte: parseInt(filter.min as string) },
+        //   });
+        // }
+        // else if (filter.max) {
+        //   filterCondition.push({
+        //     price: { $lte: parseInt(filter.max as string) },
+        //   });
+        // }
         const filterCriteria = filterCondition.length ? { $and: filterCondition } : {};
         const count = yield product_1.default.countDocuments(filterCriteria);
         const totalPages = Math.ceil(count / limit);
         const offset = (page - 1) * limit;
-        let products = yield product_1.default.find(filterCriteria).sort({ createdAt: -1 }).skip(offset).limit(limit);
+        let products = null;
+        if (filter.option == "priceDesc") {
+            products = yield product_1.default.find(filterCriteria).sort({ price: -1 }).skip(offset).limit(limit);
+        }
+        else if (filter.option == "priceAsc") {
+            products = yield product_1.default.find(filterCriteria).sort({ price: 1 }).skip(offset).limit(limit);
+        }
+        else if (filter.option == "featured") {
+            products = yield product_1.default.find(filterCriteria).sort({ sold: -1 }).skip(offset).limit(limit);
+        }
+        else {
+            products = yield product_1.default.find(filterCriteria).sort({ createdAt: -1 }).skip(offset).limit(limit);
+        }
         (0, utils_1.sendResponse)(res, 200, true, { products, totalPages, count }, null, null);
     })),
     getProductById: (0, utils_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         const { id } = req.params;
         let product = yield product_1.default.findOne({ _id: id });
+        console.log(product);
         if (!product) {
             throw new utils_1.AppError(404, "Product not found", "Get Product Error");
         }

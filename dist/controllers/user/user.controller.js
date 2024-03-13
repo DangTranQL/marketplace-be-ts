@@ -35,33 +35,12 @@ const userController = {
     getCurrentUser: (0, utils_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         const userId = req.userId;
         const user = yield user_1.default.findOne({ _id: userId });
-        (0, utils_1.sendResponse)(res, 200, true, { user }, null, null);
-    })),
-    getUserById: (0, utils_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-        const { id } = req.params;
-        let user = yield user_1.default.findOne({ _id: id });
-        if (!user) {
-            throw new utils_1.AppError(404, "User not found", "Get User Error");
-        }
-        (0, utils_1.sendResponse)(res, 200, true, { user }, null, null);
+        (0, utils_1.sendResponse)(res, 200, true, user, null, null);
     })),
     updateCurrentUser: (0, utils_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         const userId = req.userId;
         const { username, address, phone } = req.body;
         let user = yield user_1.default.findOne({ _id: userId });
-        if (!user) {
-            throw new utils_1.AppError(404, "User not found", "Update User Error");
-        }
-        user.username = username;
-        user.address = address;
-        user.phone = phone;
-        yield user.save();
-        (0, utils_1.sendResponse)(res, 200, true, { user }, null, "User updated");
-    })),
-    updateUserById: (0, utils_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-        const { id } = req.params;
-        const { username, address, phone } = req.body;
-        let user = yield user_1.default.findOne({ _id: id });
         if (!user) {
             throw new utils_1.AppError(404, "User not found", "Update User Error");
         }

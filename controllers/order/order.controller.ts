@@ -2,13 +2,15 @@ import { Request, Response, NextFunction } from "express";
 import { sendResponse, AppError, catchAsync } from "../../helpers/utils";
 import Order from "../../models/order";
 import OrderItem from "../../models/orderItem";
+import Product from "../../models/product";
 
 interface OrderController {
   createOrder: (req: Request, res: Response, next: NextFunction) => Promise<void>;
   createItem: (req: Request, res: Response, next: NextFunction) => Promise<void>;
-  getOrderById: (req: Request, res: Response, next: NextFunction) => Promise<void>;
-  getOrdersByUserId: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+  getOrdersOfCurrentUser: (req: Request, res: Response, next: NextFunction) => Promise<void>;
   getOrderItemById: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+  getAllOrders: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+  getOrderById: (req: Request, res: Response, next: NextFunction) => Promise<void>;
   updateOrder: (req: Request, res: Response, next: NextFunction) => Promise<void>;
   updateItem: (req: Request, res: Response, next: NextFunction) => Promise<void>;
   addToCart: (req: Request, res: Response, next: NextFunction) => Promise<void>;
@@ -44,27 +46,48 @@ const orderController: OrderController = {
     sendResponse(res, 200, true, { order }, null, "Item created");
   }),
 
+  getOrdersOfCurrentUser: catchAsync(async (req: any, res: Response, next: NextFunction) => {
+    const userID = req.userId;
+    let {page='1', limit='10', ...filter} = {...req.query};
+    page = parseInt(page) || 1;
+    limit = parseInt(limit) || 10;
+
+    const filterConditions: { [key: string]: any }[] = [{ userID: userID }]
+
+    if (filter.status) {
+      filterConditions.push({
+        status: { $regex: filter.status, $options: "i" },
+      });
+    }
+
+    const filterCriteria = filterConditions.length > 0 ? { $and: filterConditions } : {};
+
+    const count = await Order.countDocuments(filterCriteria);
+    const totalPage = Math.ceil(count / limit);
+    const offset = (page - 1) * limit;
+
+    let order = await Order.find(filterCriteria).sort({ createdAt: -1 }).skip(offset).limit(limit);
+
+    sendResponse(res, 200, true, { order, totalPage, count }, null, null);
+  }),
+
+  getAllOrders: catchAsync(async (req: any, res: Response, next: NextFunction) => {
+    const userID = req.userId;
+    console.log(userID);
+    const pendingOrder = await Order.find({ status: "pending", userID });
+    const pastOrders = await Order.find({ status: "completed", userID });
+  
+    sendResponse(res, 200, true, { pendingOrder, pastOrders }, null, null);
+  }),
+
   getOrderById: catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
     let order = await Order.findOne({ _id: id });
     if (!order) {
       throw new AppError(404, "Order not found", "Get Order Error");
     }
-    let orderItems = await OrderItem.find({ orderID: order._id });
-    
-    sendResponse(res, 200, true, { orderItems }, null, "Get Order by Id successful");
-  }),
-
-  getOrdersByUserId: catchAsync(async (req: any, res: Response, next: NextFunction) => {
-    const userID = req.userId;
-    let order = await Order.findOne({ userID: userID });
-    if (!order) {
-      sendResponse(res, 200, true, { order: null, orderItems: null }, null, "No orders");
-      return;
-    }
-    let orderItems = await OrderItem.find({ orderID: order._id });
-
-    sendResponse(res, 200, true, { order, orderItems }, null, "Get Order by User Id successful");
+    let orderItems = await OrderItem.find({ orderID: id });
+    sendResponse(res, 200, true, { order, orderItems }, null, "Get Order by Id successful");
   }),
 
   addToCart: catchAsync(async (req: any, res: Response, next: NextFunction) => {
@@ -105,7 +128,18 @@ const orderController: OrderController = {
     if (!order) {
       throw new AppError(404, "Order not found", "Update Order Error");
     }
-
+    if (status === "completed") {
+      let orderItems = await OrderItem.find({ orderID: id });
+      for (let i = 0; i < orderItems.length; i++) {
+        let product = await Product.findOne({ _id: orderItems[i].productID });
+        if (!product) {
+          throw new AppError(404, "Product not found", "Update Order Error");
+        }
+        product.stocks -= orderItems[i].quantity;
+        product.sold += orderItems[i].quantity;
+        await product?.save();
+      }
+    }
     sendResponse(res, 200, true, { order }, null, "Order updated");
   }),
 
@@ -125,7 +159,7 @@ const orderController: OrderController = {
     await order.save();
     item.quantity += change;
     await item.save();
-    sendResponse(res, 200, true, { order }, null, "Item updated");
+    sendResponse(res, 200, true, { order, item }, null, "Item updated");
   }),
 
   deleteOrderById: catchAsync(async (req: Request, res: Response, next: NextFunction) => {

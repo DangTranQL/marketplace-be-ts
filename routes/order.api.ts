@@ -8,11 +8,13 @@ router.post("/", validateCreateOrder, loginRequired, orderController.createOrder
 
 router.post("/:id/item", validateId, loginRequired, orderController.createItem);
 
-router.get("/:id", validateId, loginRequired, orderController.getOrderById);
-
-router.get("/user/:userID", validateUserID, loginRequired, orderController.getOrdersByUserId);
-
 router.post("/addCart", loginRequired, orderController.addToCart);
+
+router.get("/", validateUserID, loginRequired, orderController.getOrdersOfCurrentUser);
+
+router.get("/me/all", loginRequired, orderController.getAllOrders);
+
+router.get("/:id", validateId, loginRequired, orderController.getOrderById);
 
 router.get("/:id/item/:itemid", loginRequired, orderController.getOrderItemById);
 
@@ -22,6 +24,6 @@ router.patch("/:id/item/:itemid", loginRequired, orderController.updateItem);
 
 router.delete("/:id", validateId, loginRequired, orderController.deleteOrderById);
 
-router.delete("/:id/item", validateId, loginRequired, orderController.deleteItemById);
+router.delete("/:id/item/:itemid", validateId, loginRequired, orderController.deleteItemById);
 
 export default router;

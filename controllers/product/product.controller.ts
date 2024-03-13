@@ -48,21 +48,21 @@ const productController: ProductController = {
       });
     }
 
-    if (filter.min && filter.max) {
-      filterCondition.push({
-        price: { $gte: parseInt(filter.min as string), $lte: parseInt(filter.max as string) },
-      });
-    }
-    else if (filter.min) {
-      filterCondition.push({
-        price: { $gte: parseInt(filter.min as string) },
-      });
-    }
-    else if (filter.max) {
-      filterCondition.push({
-        price: { $lte: parseInt(filter.max as string) },
-      });
-    }
+    // if (filter.min && filter.max) {
+    //   filterCondition.push({
+    //     price: { $gte: parseInt(filter.min as string), $lte: parseInt(filter.max as string) },
+    //   });
+    // }
+    // else if (filter.min) {
+    //   filterCondition.push({
+    //     price: { $gte: parseInt(filter.min as string) },
+    //   });
+    // }
+    // else if (filter.max) {
+    //   filterCondition.push({
+    //     price: { $lte: parseInt(filter.max as string) },
+    //   });
+    // }
 
     const filterCriteria = filterCondition.length ? { $and: filterCondition } : {};
 
@@ -70,13 +70,25 @@ const productController: ProductController = {
     const totalPages = Math.ceil(count / limit);
     const offset = (page - 1) * limit;
 
-    let products = await Product.find(filterCriteria).sort({ createdAt: -1 }).skip(offset).limit(limit);
+    let products = null;
+
+    if (filter.option == "priceDesc") {
+      products = await Product.find(filterCriteria).sort({ price: -1 }).skip(offset).limit(limit);
+    } else if (filter.option == "priceAsc") {
+      products = await Product.find(filterCriteria).sort({ price: 1 }).skip(offset).limit(limit);
+    } else if (filter.option == "featured") {
+      products = await Product.find(filterCriteria).sort({ sold: -1 }).skip(offset).limit(limit);
+    } else {
+      products = await Product.find(filterCriteria).sort({ createdAt: -1 }).skip(offset).limit(limit);
+    }
+
     sendResponse(res, 200, true, { products, totalPages, count }, null, null);
   }),
 
   getProductById: catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
     let product = await Product.findOne({ _id: id });
+    console.log(product)
     if (!product) {
       throw new AppError(404, "Product not found", "Get Product Error");
     }

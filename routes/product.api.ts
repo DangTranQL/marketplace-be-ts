@@ -7,7 +7,7 @@ router.post("/", validateCreateProduct, productController.createProduct);
 
 router.get("/", productController.getProducts);
 
-router.get("/:id", validateId, productController.getProductById);
+router.get("/:id", productController.getProductById);
 
 router.put("/:id", validateId, productController.updateProductById);
 
