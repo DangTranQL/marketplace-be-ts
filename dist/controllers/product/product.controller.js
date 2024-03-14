@@ -51,21 +51,6 @@ const productController = {
                 category: { $regex: filter.category, $options: "i" },
             });
         }
-        // if (filter.min && filter.max) {
-        //   filterCondition.push({
-        //     price: { $gte: parseInt(filter.min as string), $lte: parseInt(filter.max as string) },
-        //   });
-        // }
-        // else if (filter.min) {
-        //   filterCondition.push({
-        //     price: { $gte: parseInt(filter.min as string) },
-        //   });
-        // }
-        // else if (filter.max) {
-        //   filterCondition.push({
-        //     price: { $lte: parseInt(filter.max as string) },
-        //   });
-        // }
         const filterCriteria = filterCondition.length ? { $and: filterCondition } : {};
         const count = yield product_1.default.countDocuments(filterCriteria);
         const totalPages = Math.ceil(count / limit);

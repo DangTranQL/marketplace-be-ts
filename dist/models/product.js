@@ -27,7 +27,7 @@ const mongoose_1 = __importStar(require("mongoose"));
 const productSchema = new mongoose_1.Schema({
     title: { type: String, required: true, trim: true, minlength: 3, unique: true },
     description: { type: String, required: true, trim: true, minlength: 3 },
-    category: { type: String, enum: ['Electronics', 'Clothing', 'Medicine', 'Food', 'Others'], required: true, trim: true, minlength: 3 },
+    category: { type: String, enum: ['electronics', 'clothing', 'medicine', 'food', 'others'], required: true, trim: true, minlength: 3 },
     stocks: { type: Number, required: true, trim: true },
     price: { type: Number, required: true, trim: true, unique: true },
     image: { type: String, required: true, trim: true, minlength: 3 },
