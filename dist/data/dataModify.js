@@ -64,7 +64,7 @@ fs.createReadStream(csvFilePath)
     .pipe((0, csv_parser_1.default)())
     .on('data', (row) => {
     // Check if any property of the row is null
-    if (Object.values(row).some(value => value === null)) {
+    if (Object.values(row).some(value => value === null || value === '')) {
         return; // Skip this row
     }
     // If 'category' is null, assign a random value from the given array

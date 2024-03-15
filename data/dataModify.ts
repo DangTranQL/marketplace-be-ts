@@ -43,7 +43,7 @@ fs.createReadStream(csvFilePath)
   .pipe(csv())
   .on('data', (row) => {
     // Check if any property of the row is null
-    if (Object.values(row).some(value => value === null)) {
+    if (Object.values(row).some(value => value === null || value === '')) {
       return; // Skip this row
     }
 
