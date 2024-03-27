@@ -25,11 +25,12 @@ const sendResponse = (res, status, success, data, errors, message) => {
 };
 exports.sendResponse = sendResponse;
 const validateSchema = (schema, reqKey) => (req, res, next) => {
-    const { error } = schema.validate(req[reqKey]);
+    const { value, error } = schema.validate(req[reqKey]);
     if (error) {
         const exception = new AppError(400, error.message, "Bad Request");
         next(exception);
     }
+    req[reqKey] = value;
     next();
 };
 exports.validateSchema = validateSchema;

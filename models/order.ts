@@ -5,7 +5,7 @@ interface IOrder extends Document {
   status: string;
   price: number;
   paymentMethod: string;
-  isDeleted: boolean;
+  address: string;
 }
 
 interface OrderModel extends Model<IOrder> {}
@@ -21,7 +21,7 @@ const orderSchema: Schema<IOrder> = new Schema(
     },
     price: { type: Number, required: true, trim: true, minlength: 3, default: 0},
     paymentMethod: { type: String, optional: true, trim: true, minlength: 3, default: "none"},
-    // items: [{ type: Schema.Types.ObjectId, optional: true }],
+    address: { type: String, optional: true, trim: true, minlength: 3, default: "none"},
   },
   {
     timestamps: true,

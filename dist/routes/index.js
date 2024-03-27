@@ -9,12 +9,11 @@ const user_api_1 = __importDefault(require("./user.api"));
 const order_api_1 = __importDefault(require("./order.api"));
 const product_api_1 = __importDefault(require("./product.api"));
 const auth_api_1 = __importDefault(require("./auth.api"));
-/* GET home page. */
-router.get("/", (req, res) => {
-    res.send("E-Shop");
-});
+const admin_api_1 = __importDefault(require("./admin.api"));
 /* User API */
 router.use("/user", user_api_1.default);
+/* Admin API */
+router.use("/admin", admin_api_1.default);
 /* Auth API */
 router.use("/login", auth_api_1.default);
 /* Product API */

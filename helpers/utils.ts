@@ -25,11 +25,12 @@ export const sendResponse = (res: Response, status: number, success: boolean, da
 }
 
 export const validateSchema = (schema: ObjectSchema, reqKey: "params" | "body" | "query") => (req: Request, res: Response, next: NextFunction) => {
-    const { error } = schema.validate(req[reqKey]);
+    const { value, error } = schema.validate(req[reqKey]);
     if (error) {
       const exception = new AppError(400, error.message, "Bad Request");
       next(exception);
     }
+    req[reqKey] = value;
     next();
 }
 

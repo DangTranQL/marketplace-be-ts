@@ -1,29 +1,31 @@
 import express from "express";
 const router = express.Router();
-import orderController from "../controllers/order/order.controller";
-import { validateCreateOrder, validateId, validateUserID } from "../helpers/validation";
+import { createOrder, createItem, getOrdersOfCurrentUser, getPendingOrder, getCompletedOrders, getOrderById, getOrderItemById, updateOrder, updateItem, deleteOrderById, addToCart, deleteItemById} from "../controllers/order/order.controller";
+import { validateCreateOrder, validateCreateOrderItem, validateGetAllOrders, validateId } from "../helpers/validation";
 import { loginRequired } from "../helpers/authentication";
 
-router.post("/", validateCreateOrder, loginRequired, orderController.createOrder);
+router.post("/", loginRequired, validateCreateOrder, createOrder);
 
-router.post("/:id/item", validateId, loginRequired, orderController.createItem);
+router.post("/:id/item", loginRequired, validateId, validateCreateOrderItem, createItem);
 
-router.post("/addCart", loginRequired, orderController.addToCart);
+router.post("/addCart", loginRequired, validateCreateOrderItem, addToCart);
 
-router.get("/", validateUserID, loginRequired, orderController.getOrdersOfCurrentUser);
+router.get("/", loginRequired, validateGetAllOrders, getOrdersOfCurrentUser);
 
-router.get("/me/all", loginRequired, orderController.getAllOrders);
+router.get("/me/pending", loginRequired, getPendingOrder);
 
-router.get("/:id", validateId, loginRequired, orderController.getOrderById);
+router.get("/me/completed", loginRequired, getCompletedOrders);
 
-router.get("/:id/item/:itemid", loginRequired, orderController.getOrderItemById);
+router.get("/:id", loginRequired, validateId, getOrderById);
 
-router.patch("/:id", validateId, loginRequired, orderController.updateOrder);
+router.get("/:id/item/:itemid", loginRequired, getOrderItemById);
 
-router.patch("/:id/item/:itemid", loginRequired, orderController.updateItem);
+router.patch("/:id", loginRequired, validateId, updateOrder);
 
-router.delete("/:id", validateId, loginRequired, orderController.deleteOrderById);
+router.patch("/:id/item/:itemid", loginRequired, updateItem);
 
-router.delete("/:id/item/:itemid", validateId, loginRequired, orderController.deleteItemById);
+router.delete("/:id", loginRequired, validateId, deleteOrderById);
+
+router.delete("/:id/item/:itemid", loginRequired, deleteItemById);
 
 export default router;

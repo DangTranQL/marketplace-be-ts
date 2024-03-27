@@ -34,7 +34,7 @@ const orderSchema = new mongoose_1.Schema({
     },
     price: { type: Number, required: true, trim: true, minlength: 3, default: 0 },
     paymentMethod: { type: String, optional: true, trim: true, minlength: 3, default: "none" },
-    // items: [{ type: Schema.Types.ObjectId, optional: true }],
+    address: { type: String, optional: true, trim: true, minlength: 3, default: "none" },
 }, {
     timestamps: true,
     collection: "orders",

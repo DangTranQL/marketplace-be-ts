@@ -23,12 +23,21 @@ const loginCheck = Joi.object({
   password: Joi.string().required(),
 });
 
-const productCreateCheck = Joi.object({
+const productCheck = Joi.object({
   title: Joi.string().required(),
   description: Joi.string().required(),
+  category: Joi.string().required(),
   stocks: Joi.number().required(),
   price: Joi.number().required(),
   image: Joi.string().optional(),
+});
+
+const getProductCheck = Joi.object({
+  page: Joi.number().optional().default(1),
+  limit: Joi.number().optional().default(10),
+  title: Joi.string().optional(),
+  category: Joi.string().optional(),
+  option: Joi.string().optional(),
 });
 
 const orderCreateCheck = Joi.object({
@@ -37,17 +46,25 @@ const orderCreateCheck = Joi.object({
 });
 
 const orderItemCreateCheck = Joi.object({
-  orderID: Joi.string().required(),
   productID: Joi.string().required(),
+  title: Joi.string().required(),
   quantity: Joi.number().required(),
   itemPrice: Joi.number().required(),
-  isDeleted: Joi.boolean().optional(),
+  image: Joi.string().optional(),
+});
+
+const getAllOrdersCheck = Joi.object({
+  page: Joi.number().optional().default(1),
+  limit: Joi.number().optional().default(10),
+  status: Joi.string().optional(),
 });
 
 export const validateId = validateSchema(idCheck, "params");
 export const validateUserID = validateSchema(userIDCheck, "params");
 export const validateCreateUser = validateSchema(userCreateCheck, "body");
 export const validateLogin = validateSchema(loginCheck, "body");
-export const validateCreateProduct = validateSchema(productCreateCheck, "body");
+export const validateProduct = validateSchema(productCheck, "body");
+export const validateGetProduct = validateSchema(getProductCheck, "query");
 export const validateCreateOrder = validateSchema(orderCreateCheck, "body");
 export const validateCreateOrderItem = validateSchema(orderItemCreateCheck, "body");
+export const validateGetAllOrders = validateSchema(getAllOrdersCheck, "query");

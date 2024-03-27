@@ -1,13 +1,13 @@
 import express from "express";
 const router = express.Router();
-import userController from "../controllers/user/user.controller";
-import { validateCreateUser, validateId } from "../helpers/validation";
+import { createUser, getCurrentUser, updateCurrentUser } from "../controllers/user/user.controller";
+import { validateCreateUser } from "../helpers/validation";
 import { loginRequired } from "../helpers/authentication";
 
-router.post("/", validateCreateUser, userController.createUser);
+router.post("/", validateCreateUser, createUser);
 
-router.get("/me", loginRequired, userController.getCurrentUser);
+router.get("/me", loginRequired, getCurrentUser);
 
-router.put("/me", loginRequired, userController.updateCurrentUser);
+router.put("/me", loginRequired, updateCurrentUser);
 
 export default router;

@@ -4,14 +4,13 @@ import userAPI from "./user.api";
 import orderAPI from "./order.api";
 import productAPI from "./product.api";
 import authAPI from "./auth.api";
-
-/* GET home page. */
-router.get("/", (req, res) => {
-  res.send("E-Shop");
-});
+import adminAPI from "./admin.api";
 
 /* User API */
 router.use("/user", userAPI);
+
+/* Admin API */
+router.use("/admin", adminAPI);
 
 /* Auth API */
 router.use("/login", authAPI);

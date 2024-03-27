@@ -1,14 +1,10 @@
 import express from 'express';
 const router = express.Router();
-import productController from '../controllers/product/product.controller';
-import { validateCreateProduct, validateId } from '../helpers/validation';
+import { getProducts, getProductById } from '../controllers/product/product.controller';
+import { validateGetProduct, validateId } from '../helpers/validation';
 
-router.post("/", validateCreateProduct, productController.createProduct);
+router.get("/", validateGetProduct, getProducts);
 
-router.get("/", productController.getProducts);
-
-router.get("/:id", productController.getProductById);
-
-router.put("/:id", validateId, productController.updateProductById);
+router.get("/:id", validateId, getProductById);
 
 export default router;
