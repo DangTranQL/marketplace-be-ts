@@ -1,0 +1,23 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const router = express_1.default.Router();
+const order_controller_1 = require("../controllers/order/order.controller");
+const validation_1 = require("../helpers/validation");
+const authentication_1 = require("../helpers/authentication");
+router.post("/", authentication_1.loginRequired, validation_1.validateCreateOrder, order_controller_1.createOrder);
+router.post("/:id/item", authentication_1.loginRequired, validation_1.validateId, validation_1.validateCreateOrderItem, order_controller_1.createItem);
+router.post("/addCart", authentication_1.loginRequired, validation_1.validateCreateOrderItem, order_controller_1.addToCart);
+router.get("/", authentication_1.loginRequired, validation_1.validateGetAllOrders, order_controller_1.getOrdersOfCurrentUser);
+router.get("/me/pending", authentication_1.loginRequired, order_controller_1.getPendingOrder);
+router.get("/me/completed", authentication_1.loginRequired, order_controller_1.getCompletedOrders);
+router.get("/:id", authentication_1.loginRequired, validation_1.validateId, order_controller_1.getOrderById);
+router.get("/:id/item/:itemid", authentication_1.loginRequired, order_controller_1.getOrderItemById);
+router.patch("/:id", authentication_1.loginRequired, validation_1.validateId, order_controller_1.updateOrder);
+router.patch("/:id/item/:itemid", authentication_1.loginRequired, order_controller_1.updateItem);
+router.delete("/:id", authentication_1.loginRequired, validation_1.validateId, order_controller_1.deleteOrderById);
+router.delete("/:id/item/:itemid", authentication_1.loginRequired, order_controller_1.deleteItemById);
+exports.default = router;

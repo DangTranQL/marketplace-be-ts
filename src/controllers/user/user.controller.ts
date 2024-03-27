@@ -3,7 +3,7 @@ import { sendResponse, AppError, catchAsync } from "../../helpers/utils";
 import bcrypt from "bcryptjs";
 import User from "../../models/user";
 import { generateToken } from "../../helpers/generateToken";
-import { Request } from "../../src/types/request";
+import { Request } from "../../types/request";
 
 export const createUser = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     let { username, email, password, role, address, phone } = req.body;
