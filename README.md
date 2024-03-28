@@ -1,0 +1,55 @@
+1. To run the API: ```npm run dev``` or ```npm run start```
+
+2. **Routes:**
+
+   _login:_
+
+               POST('/login'): login
+
+   _product:_
+
+               GET('/products'): get all products
+
+               GET('/products/:id'): get a product by id
+
+   Require login:
+
+   _user:_
+   
+              POST('/user'): create user
+   
+              GET('/user/me'): get current user
+   
+              PUT('/user/me'): update current user
+
+   _admin:_
+
+               GET('/admin/users'): get all users' information
+
+               GET('/amdin/orders'): get all orders
+
+               POST('/admin/products'): create a new product
+
+               PUT/DELETE('/admin/products/:id'): update/delete a product
+
+    _order:_
+
+              POST('/orders'): create a new order for current user
+
+              POST('/orders/addCart'): add current product to your cart
+
+              GET('/orders/me/pending'): get pending order of current user
+
+              GET('/orders/me/completed'): get completed order of current user
+
+              GET('/orders/:id'): get order by id
+
+              GET('/orders/:id/item/:itemid'): get order item by itemid with order of id
+
+              PATCH('/orders/:id'): update order by id (address, status, payment method)
+
+              PATCH('/orders/:id/item/:itemid'): update order item by itemid with order of id (quantity)
+
+3. **ERD:**
+
+   ![ERD](https://github.com/DangTranQL/marketplace-be-ts/assets/72413423/0b5b3be5-b520-43d4-91e5-f6c289e1361b)
