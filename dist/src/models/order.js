@@ -33,7 +33,7 @@ const orderSchema = new mongoose_1.Schema({
         default: "pending",
     },
     price: { type: Number, required: true, trim: true, minlength: 3, default: 0 },
-    paymentMethod: { type: String, optional: true, trim: true, minlength: 3, default: "none" },
+    paymentMethod: { type: String, optional: true, trim: true, minlength: 3, default: "Card" },
     address: { type: String, optional: true, trim: true, minlength: 3, default: "none" },
 }, {
     timestamps: true,

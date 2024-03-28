@@ -10,7 +10,6 @@ interface IProduct extends Document {
   sold: number;
   totalRating: number;
   totalReview: number;
-  isDeleted: boolean;
 }
 
 interface ProductModel extends Model<IProduct> {}

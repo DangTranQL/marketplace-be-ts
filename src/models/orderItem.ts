@@ -7,7 +7,6 @@ interface IOrderItem extends Document {
   quantity: number;
   itemPrice: number;
   image: string;
-  isDeleted: boolean;
 }
 
 interface OrderItemModel extends Model<IOrderItem> {}

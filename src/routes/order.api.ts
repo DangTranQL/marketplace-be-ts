@@ -1,12 +1,10 @@
 import express from "express";
 const router = express.Router();
-import { createOrder, createItem, getOrdersOfCurrentUser, getPendingOrder, getCompletedOrders, getOrderById, getOrderItemById, updateOrder, updateItem, deleteOrderById, addToCart, deleteItemById} from "../controllers/order/order.controller";
+import { createOrder, getOrdersOfCurrentUser, getPendingOrder, getCompletedOrders, getOrderById, getOrderItemById, updateOrder, updateItem, deleteOrderById, addToCart, deleteItemById} from "../controllers/order/order.controller";
 import { validateCreateOrder, validateCreateOrderItem, validateGetAllOrders, validateId } from "../helpers/validation";
 import { loginRequired } from "../helpers/authentication";
 
 router.post("/", loginRequired, validateCreateOrder, createOrder);
-
-router.post("/:id/item", loginRequired, validateId, validateCreateOrderItem, createItem);
 
 router.post("/addCart", loginRequired, validateCreateOrderItem, addToCart);
 

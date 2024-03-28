@@ -9,7 +9,6 @@ const order_controller_1 = require("../controllers/order/order.controller");
 const validation_1 = require("../helpers/validation");
 const authentication_1 = require("../helpers/authentication");
 router.post("/", authentication_1.loginRequired, validation_1.validateCreateOrder, order_controller_1.createOrder);
-router.post("/:id/item", authentication_1.loginRequired, validation_1.validateId, validation_1.validateCreateOrderItem, order_controller_1.createItem);
 router.post("/addCart", authentication_1.loginRequired, validation_1.validateCreateOrderItem, order_controller_1.addToCart);
 router.get("/", authentication_1.loginRequired, validation_1.validateGetAllOrders, order_controller_1.getOrdersOfCurrentUser);
 router.get("/me/pending", authentication_1.loginRequired, order_controller_1.getPendingOrder);
