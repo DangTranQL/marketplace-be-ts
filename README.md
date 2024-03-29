@@ -50,6 +50,13 @@
 
               PATCH('/orders/:id/item/:itemid'): update order item by itemid with order of id (quantity)
 
-3. **ERD:**
+3. **Sample accounts:**
 
-   ![ERD](https://github.com/DangTranQL/marketplace-be-ts/assets/72413423/0b5b3be5-b520-43d4-91e5-f6c289e1361b)
+   user: ```dang@gmail.com```, ```dang```
+
+   admin: ```admin@gmail.com```, ```admin```
+
+5. **ERD:**
+
+   ![ERD](https://github.com/DangTranQL/marketplace-be-ts/assets/72413423/125878cd-5a9c-4034-a3d2-7ea0e883c137)
+
