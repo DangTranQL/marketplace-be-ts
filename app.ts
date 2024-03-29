@@ -6,8 +6,8 @@ import logger from "morgan";
 import mongoose from "mongoose";
 import dotenv from 'dotenv'; 
 dotenv.config();
-import { sendResponse, AppError } from "./helpers/utils";
-import indexRouter from "./routes/index";
+import { sendResponse, AppError } from "./src/helpers/utils";
+import indexRouter from "./src/routes/index";
 
 const app: Express = express();
 

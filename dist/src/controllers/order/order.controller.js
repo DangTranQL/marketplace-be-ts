@@ -33,10 +33,14 @@ exports.createOrder = (0, utils_1.catchAsync)((req, res, next) => __awaiter(void
     const { userID, status } = req.body;
     // check if order already exists
     let checkOrder = yield order_1.default.findOne({ userID, status: "pending" });
+    let user = yield user_1.default.findOne({ _id: userID });
+    if (!user) {
+        throw new utils_1.AppError(404, "User not found", "Create Order Error");
+    }
     if (checkOrder) {
         (0, utils_1.sendResponse)(res, 200, true, { order: checkOrder }, null, "Order already exists");
     }
-    let newOrder = yield order_1.default.create({ userID, status, price: 0 });
+    let newOrder = yield order_1.default.create({ userID, status, price: 0, address: user.address });
     (0, utils_1.sendResponse)(res, 200, true, { newOrder }, null, "Order created");
 }));
 exports.createItem = (0, utils_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
@@ -71,7 +75,8 @@ exports.getOrdersOfCurrentUser = (0, utils_1.catchAsync)((req, res, next) => __a
 exports.getPendingOrder = (0, utils_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const userID = req.userId;
     const pendingOrder = yield order_1.default.find({ status: "pending", userID });
-    (0, utils_1.sendResponse)(res, 200, true, { pendingOrder }, null, null);
+    const numberOfItems = yield orderItem_1.default.find({ orderID: pendingOrder[0]._id }).countDocuments();
+    (0, utils_1.sendResponse)(res, 200, true, { pendingOrder, numberOfItems }, null, null);
 }));
 exports.getCompletedOrders = (0, utils_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const userID = req.userId;
@@ -99,8 +104,12 @@ exports.addToCart = (0, utils_1.catchAsync)((req, res, next) => __awaiter(void 0
     const userId = req.userId;
     const { productID, title, quantity, itemPrice, image } = req.body;
     let order = yield order_1.default.findOne({ userID: userId, status: "pending" });
+    let user = yield user_1.default.findOne({ _id: userId });
+    if (!user) {
+        throw new utils_1.AppError(404, "User not found", "Add to Cart Error");
+    }
     if (!order) {
-        order = yield order_1.default.create({ userID: userId, status: "pending", price: 0 });
+        order = yield order_1.default.create({ userID: userId, status: "pending", price: 0, address: user.address });
         let item = yield orderItem_1.default.create({ orderID: order._id, productID, title, quantity, itemPrice, image });
         order.price = item.itemPrice * item.quantity;
         yield order.save();
@@ -167,8 +176,7 @@ exports.updateOrder = (0, utils_1.catchAsync)((req, res, next) => __awaiter(void
             product.sold += orderItems[i].quantity;
             yield (product === null || product === void 0 ? void 0 : product.save());
         }
-        order.address = user.address;
-        yield (order === null || order === void 0 ? void 0 : order.save());
+        yield order.save();
     }
     (0, utils_1.sendResponse)(res, 200, true, { order }, null, "Order updated");
 }));

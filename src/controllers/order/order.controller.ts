@@ -9,10 +9,14 @@ export const createOrder = catchAsync(async (req: Request, res: Response, next: 
     const { userID, status } = req.body;
     // check if order already exists
     let checkOrder = await Order.findOne({ userID, status: "pending" });
+    let user = await User.findOne({ _id: userID });
+    if (!user) {
+      throw new AppError(404, "User not found", "Create Order Error");
+    }
     if (checkOrder) {
       sendResponse(res, 200, true, { order: checkOrder }, null, "Order already exists");
     }
-    let newOrder = await Order.create({ userID, status, price: 0});
+    let newOrder = await Order.create({ userID, status, price: 0, address: user.address });
 
     sendResponse(res, 200, true, { newOrder }, null, "Order created");
   });
@@ -58,8 +62,9 @@ export const getOrdersOfCurrentUser = catchAsync(async (req: any, res: Response,
 export const getPendingOrder = catchAsync(async (req: any, res: Response, next: NextFunction) => {
     const userID = req.userId;
     const pendingOrder = await Order.find({ status: "pending", userID });
+    const numberOfItems = await OrderItem.find({ orderID: pendingOrder[0]._id }).countDocuments();
   
-    sendResponse(res, 200, true, { pendingOrder }, null, null);
+    sendResponse(res, 200, true, { pendingOrder, numberOfItems }, null, null);
   });
 
 export const getCompletedOrders = catchAsync(async (req: any, res: Response, next: NextFunction) => {
@@ -95,8 +100,12 @@ export const addToCart = catchAsync(async (req: any, res: Response, next: NextFu
     const userId = req.userId;
     const { productID, title, quantity, itemPrice, image } = req.body;
     let order = await Order.findOne({ userID: userId, status: "pending" });
+    let user = await User.findOne({ _id: userId });
+    if (!user) {
+      throw new AppError(404, "User not found", "Add to Cart Error");
+    }
     if (!order) {
-      order = await Order.create({ userID: userId, status: "pending", price: 0 });
+      order = await Order.create({ userID: userId, status: "pending", price: 0, address: user.address});
       let item = await OrderItem.create({ orderID: order._id, productID, title, quantity, itemPrice, image });
       order.price = item.itemPrice * item.quantity;
       await order.save();
@@ -172,8 +181,7 @@ export const updateOrder = catchAsync(async (req: Request, res: Response, next: 
         product.sold += orderItems[i].quantity;
         await product?.save();
       }
-      order.address = user.address;
-      await order?.save();
+      await order.save();
     }
     sendResponse(res, 200, true, { order }, null, "Order updated");
   });
