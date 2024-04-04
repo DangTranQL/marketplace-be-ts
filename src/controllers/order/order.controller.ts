@@ -9,14 +9,10 @@ export const createOrder = catchAsync(async (req: Request, res: Response, next: 
     const { userID, status } = req.body;
     // check if order already exists
     let checkOrder = await Order.findOne({ userID, status: "pending" });
-    let user = await User.findOne({ _id: userID });
-    if (!user) {
-      throw new AppError(404, "User not found", "Create Order Error");
-    }
     if (checkOrder) {
       sendResponse(res, 200, true, { order: checkOrder }, null, "Order already exists");
     }
-    let newOrder = await Order.create({ userID, status, price: 0, address: user.address });
+    let newOrder = await Order.create({ userID, status, price: 0 });
 
     sendResponse(res, 200, true, { newOrder }, null, "Order created");
   });
@@ -161,8 +157,8 @@ export const getAllOrders = catchAsync(async (req: any, res: Response, next: Nex
 
 export const updateOrder = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
-    const { status, paymentMethod } = req.body;
-    let order = await Order.findOneAndUpdate({ _id: id }, { status, paymentMethod });
+    const { status, address, paymentMethod } = req.body;
+    let order = await Order.findOneAndUpdate({ _id: id }, { status, address, paymentMethod });
     let user = await User.findOne({ _id: order?.userID });
     if (!order) {
       throw new AppError(404, "Order not found", "Update Order Error");
