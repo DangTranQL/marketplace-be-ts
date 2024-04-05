@@ -58,9 +58,10 @@ export const getOrdersOfCurrentUser = catchAsync(async (req: any, res: Response,
 export const getPendingOrder = catchAsync(async (req: any, res: Response, next: NextFunction) => {
     const userID = req.userId;
     const pendingOrder = await Order.find({ status: "pending", userID });
+    const orderItems = await OrderItem.find({ orderID: pendingOrder[0]._id }).sort({ createdAt: -1 });
     const numberOfItems = await OrderItem.find({ orderID: pendingOrder[0]._id }).countDocuments();
   
-    sendResponse(res, 200, true, { pendingOrder, numberOfItems }, null, null);
+    sendResponse(res, 200, true, { pendingOrder, orderItems, numberOfItems }, null, null);
   });
 
 export const getCompletedOrders = catchAsync(async (req: any, res: Response, next: NextFunction) => {
