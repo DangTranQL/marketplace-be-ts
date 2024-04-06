@@ -14,5 +14,6 @@ router.get("/users", authentication_1.loginRequired, authentication_1.adminRequi
 router.get("/orders", authentication_1.loginRequired, authentication_1.adminRequired, order_controller_1.getAllOrders);
 router.post("/products", authentication_1.loginRequired, authentication_1.adminRequired, validation_1.validateProduct, product_controller_1.createProduct);
 router.put("/products/:id", authentication_1.loginRequired, authentication_1.adminRequired, validation_1.validateProduct, product_controller_1.updateProductById);
+router.patch("/orders/:id", authentication_1.loginRequired, authentication_1.adminRequired, validation_1.validateId, order_controller_1.updateOrder);
 router.delete("/products/:id", authentication_1.loginRequired, authentication_1.adminRequired, validation_1.validateId, product_controller_1.deleteProductById);
 exports.default = router;
