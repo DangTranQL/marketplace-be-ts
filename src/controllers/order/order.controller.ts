@@ -4,6 +4,7 @@ import Order from "../../models/order";
 import OrderItem from "../../models/orderItem";
 import Product from "../../models/product";
 import User from "../../models/user";
+import { NodeBuilderFlags } from "typescript";
 
 export const createOrder = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const { userID, status } = req.body;
@@ -102,7 +103,7 @@ export const addToCart = catchAsync(async (req: any, res: Response, next: NextFu
       throw new AppError(404, "User not found", "Add to Cart Error");
     }
     if (!order) {
-      order = await Order.create({ userID: userId, status: "pending", price: 0, address: user.address});
+      order = await Order.create({ userID: userId, status: "pending", price: 0, address: null});
       let itemcheck = await OrderItem.findOne({ orderID: order._id, productID });
       if (!itemcheck) {
         let item = await OrderItem.create({ orderID: order._id, productID, title, quantity, itemPrice, image });
@@ -168,7 +169,7 @@ export const getAllOrders = catchAsync(async (req: any, res: Response, next: Nex
 export const updateOrder = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
     const { status, address, paymentMethod } = req.body;
-    let order = await Order.findOneAndUpdate({ _id: id }, { status, address, paymentMethod });
+    let order = await Order.findOneAndUpdate({ _id: id }, { status: status, address: address, paymentMethod: paymentMethod });
     let user = await User.findOne({ _id: order?.userID });
     if (!order) {
       throw new AppError(404, "Order not found", "Update Order Error");
@@ -176,19 +177,17 @@ export const updateOrder = catchAsync(async (req: Request, res: Response, next: 
     if (!user) {
       throw new AppError(404, "User not found", "Update Order Error");
     }
-    if (status === "completed") {
-      let orderItems = await OrderItem.find({ orderID: id });
-      for (let i = 0; i < orderItems.length; i++) {
-        let product = await Product.findOne({ _id: orderItems[i].productID });
-        if (!product) {
-          throw new AppError(404, "Product not found", "Update Order Error");
-        }
-        product.stocks -= orderItems[i].quantity;
-        product.sold += orderItems[i].quantity;
-        await product?.save();
+    let orderItems = await OrderItem.find({ orderID: id });
+    for (let i = 0; i < orderItems.length; i++) {
+      let product = await Product.findOne({ _id: orderItems[i].productID });
+      if (!product) {
+        throw new AppError(404, "Product not found", "Update Order Error");
       }
-      await order.save();
+      product.stocks -= orderItems[i].quantity;
+      product.sold += orderItems[i].quantity;
+      await product?.save();
     }
+    await order.save();
     sendResponse(res, 200, true, { order }, null, "Order updated");
   });
 
