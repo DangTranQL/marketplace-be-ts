@@ -169,13 +169,9 @@ export const getAllOrders = catchAsync(async (req: any, res: Response, next: Nex
 export const updateOrder = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
     const { status, address, paymentMethod } = req.body;
-    let order = await Order.findOneAndUpdate({ _id: id }, { status: status, address: address, paymentMethod: paymentMethod });
-    let user = await User.findOne({ _id: order?.userID });
+    let order = await Order.findOne({ _id: id });
     if (!order) {
       throw new AppError(404, "Order not found", "Update Order Error");
-    }
-    if (!user) {
-      throw new AppError(404, "User not found", "Update Order Error");
     }
     let orderItems = await OrderItem.find({ orderID: id });
     for (let i = 0; i < orderItems.length; i++) {
@@ -187,6 +183,9 @@ export const updateOrder = catchAsync(async (req: Request, res: Response, next: 
       product.sold += orderItems[i].quantity;
       await product?.save();
     }
+    order.status = status;
+    order.address = address;
+    order.paymentMethod = paymentMethod;
     await order.save();
     sendResponse(res, 200, true, { order }, null, "Order updated");
   });
