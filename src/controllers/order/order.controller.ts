@@ -109,14 +109,14 @@ export const addToCart = catchAsync(async (req: any, res: Response, next: NextFu
         let item = await OrderItem.create({ orderID: order._id, productID, title, quantity, itemPrice, image });
         order.price = item.itemPrice * item.quantity;
         await order.save();
-        sendResponse(res, 200, true, { order }, null, "Item added to cart");
       } else {
         itemcheck.quantity += 1;
         await itemcheck.save();
         order.price += itemcheck.itemPrice * itemcheck.quantity;
         await order.save();
-        sendResponse(res, 200, true, { order }, null, "Duplicate item added to cart");
       }
+      let numItems = await OrderItem.find({ orderID: order._id }).countDocuments();
+      sendResponse(res, 200, true, { order, numItems }, null, "Item added to cart");
     } else {
       let itemcheck = await OrderItem.findOne({ orderID: order._id, productID });
       if (itemcheck) {
@@ -124,13 +124,13 @@ export const addToCart = catchAsync(async (req: any, res: Response, next: NextFu
         await itemcheck.save();
         order.price += itemcheck.itemPrice * itemcheck.quantity;
         await order.save();
-        sendResponse(res, 200, true, { order }, null, "Duplicate item added to cart");
       } else {
         let item = await OrderItem.create({ orderID: order._id, productID, title, quantity, itemPrice, image });
         order.price += item.itemPrice * item.quantity;
         await order.save();
-        sendResponse(res, 200, true, { order }, null, "Item added to cart");
       }
+      let numItems = await OrderItem.find({ orderID: order._id }).countDocuments();
+      sendResponse(res, 200, true, { order, numItems }, null, "Item added to cart");
     }
   });
 
