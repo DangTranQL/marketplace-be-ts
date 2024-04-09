@@ -123,10 +123,20 @@ exports.addToCart = (0, utils_1.catchAsync)((req, res, next) => __awaiter(void 0
         }
     }
     else {
-        let item = yield orderItem_1.default.create({ orderID: order._id, productID, title, quantity, itemPrice, image });
-        order.price += item.itemPrice * item.quantity;
-        yield order.save();
-        (0, utils_1.sendResponse)(res, 200, true, { order }, null, "Item added to cart");
+        let itemcheck = yield orderItem_1.default.findOne({ orderID: order._id, productID });
+        if (itemcheck) {
+            itemcheck.quantity += 1;
+            yield itemcheck.save();
+            order.price += itemcheck.itemPrice * itemcheck.quantity;
+            yield order.save();
+            (0, utils_1.sendResponse)(res, 200, true, { order }, null, "Duplicate item added to cart");
+        }
+        else {
+            let item = yield orderItem_1.default.create({ orderID: order._id, productID, title, quantity, itemPrice, image });
+            order.price += item.itemPrice * item.quantity;
+            yield order.save();
+            (0, utils_1.sendResponse)(res, 200, true, { order }, null, "Item added to cart");
+        }
     }
 }));
 exports.getOrderItemById = (0, utils_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
