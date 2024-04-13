@@ -28,6 +28,8 @@
 
                GET('/amdin/orders'): get all orders
 
+               PATCH('/admin/orders/:id'): update an order
+
                POST('/admin/products'): create a new product
 
                PUT/DELETE('/admin/products/:id'): update/delete a product
@@ -50,7 +52,7 @@
 
               PATCH('/orders/:id/item/:itemid'): update order item by itemid with order of id (quantity)
 
-3. **Sample accounts:**
+4. **Sample accounts:**
 
    user: ```dang@gmail.com```, ```dang```
 
