@@ -11,7 +11,7 @@ export const createOrder = catchAsync(async (req: Request, res: Response, next: 
     // check if order already exists
     let checkOrder = await Order.findOne({ userID, status: "pending" });
     if (checkOrder) {
-      sendResponse(res, 200, true, { order: checkOrder }, null, "Order already exists");
+      sendResponse(res, 400, true, { order: checkOrder }, null, "Order already exists");
     }
     let newOrder = await Order.create({ userID, status, price: 0 });
 
@@ -59,6 +59,7 @@ export const getOrdersOfCurrentUser = catchAsync(async (req: any, res: Response,
 export const getPendingOrder = catchAsync(async (req: any, res: Response, next: NextFunction) => {
     const userID = req.userId;
     const pendingOrder = await Order.find({ status: "pending", userID });
+    // check pendingOrder
     const orderItems = await OrderItem.find({ orderID: pendingOrder[0]._id }).sort({ createdAt: -1 });
     const numberOfItems = await OrderItem.find({ orderID: pendingOrder[0]._id }).countDocuments();
   
@@ -104,34 +105,20 @@ export const addToCart = catchAsync(async (req: any, res: Response, next: NextFu
     }
     if (!order) {
       order = await Order.create({ userID: userId, status: "pending", price: 0, address: null});
-      let itemcheck = await OrderItem.findOne({ orderID: order._id, productID });
-      if (!itemcheck) {
-        let item = await OrderItem.create({ orderID: order._id, productID, title, quantity, itemPrice, image });
-        order.price = item.itemPrice * item.quantity;
-        await order.save();
-      } else {
-        itemcheck.quantity += 1;
-        await itemcheck.save();
-        order.price += itemcheck.itemPrice * itemcheck.quantity;
-        await order.save();
-      }
-      let numItems = await OrderItem.find({ orderID: order._id }).countDocuments();
-      sendResponse(res, 200, true, { order, numItems }, null, "Item added to cart");
+    } 
+    let itemcheck = await OrderItem.findOne({ orderID: order._id, productID });
+    if (itemcheck) {
+      itemcheck.quantity += 1;
+      await itemcheck.save();
+      order.price += itemcheck.itemPrice * itemcheck.quantity;
+      await order.save();
     } else {
-      let itemcheck = await OrderItem.findOne({ orderID: order._id, productID });
-      if (itemcheck) {
-        itemcheck.quantity += 1;
-        await itemcheck.save();
-        order.price += itemcheck.itemPrice * itemcheck.quantity;
-        await order.save();
-      } else {
-        let item = await OrderItem.create({ orderID: order._id, productID, title, quantity, itemPrice, image });
-        order.price += item.itemPrice * item.quantity;
-        await order.save();
-      }
-      let numItems = await OrderItem.find({ orderID: order._id }).countDocuments();
-      sendResponse(res, 200, true, { order, numItems }, null, "Item added to cart");
+      let item = await OrderItem.create({ orderID: order._id, productID, title, quantity, itemPrice, image });
+      order.price += item.itemPrice * item.quantity;
+      await order.save();
     }
+    let numItems = await OrderItem.find({ orderID: order._id }).countDocuments();
+    sendResponse(res, 200, true, { order, numItems }, null, "Item added to cart");
   });
 
 export const getOrderItemById = catchAsync(async (req: Request, res: Response, next: NextFunction) => {

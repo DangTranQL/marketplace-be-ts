@@ -34,7 +34,7 @@ exports.createOrder = (0, utils_1.catchAsync)((req, res, next) => __awaiter(void
     // check if order already exists
     let checkOrder = yield order_1.default.findOne({ userID, status: "pending" });
     if (checkOrder) {
-        (0, utils_1.sendResponse)(res, 200, true, { order: checkOrder }, null, "Order already exists");
+        (0, utils_1.sendResponse)(res, 400, true, { order: checkOrder }, null, "Order already exists");
     }
     let newOrder = yield order_1.default.create({ userID, status, price: 0 });
     (0, utils_1.sendResponse)(res, 200, true, { newOrder }, null, "Order created");
@@ -71,6 +71,7 @@ exports.getOrdersOfCurrentUser = (0, utils_1.catchAsync)((req, res, next) => __a
 exports.getPendingOrder = (0, utils_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const userID = req.userId;
     const pendingOrder = yield order_1.default.find({ status: "pending", userID });
+    // check pendingOrder
     const orderItems = yield orderItem_1.default.find({ orderID: pendingOrder[0]._id }).sort({ createdAt: -1 });
     const numberOfItems = yield orderItem_1.default.find({ orderID: pendingOrder[0]._id }).countDocuments();
     (0, utils_1.sendResponse)(res, 200, true, { pendingOrder, orderItems, numberOfItems }, null, null);
@@ -107,37 +108,21 @@ exports.addToCart = (0, utils_1.catchAsync)((req, res, next) => __awaiter(void 0
     }
     if (!order) {
         order = yield order_1.default.create({ userID: userId, status: "pending", price: 0, address: null });
-        let itemcheck = yield orderItem_1.default.findOne({ orderID: order._id, productID });
-        if (!itemcheck) {
-            let item = yield orderItem_1.default.create({ orderID: order._id, productID, title, quantity, itemPrice, image });
-            order.price = item.itemPrice * item.quantity;
-            yield order.save();
-        }
-        else {
-            itemcheck.quantity += 1;
-            yield itemcheck.save();
-            order.price += itemcheck.itemPrice * itemcheck.quantity;
-            yield order.save();
-        }
-        let numItems = yield orderItem_1.default.find({ orderID: order._id }).countDocuments();
-        (0, utils_1.sendResponse)(res, 200, true, { order, numItems }, null, "Item added to cart");
+    }
+    let itemcheck = yield orderItem_1.default.findOne({ orderID: order._id, productID });
+    if (itemcheck) {
+        itemcheck.quantity += 1;
+        yield itemcheck.save();
+        order.price += itemcheck.itemPrice * itemcheck.quantity;
+        yield order.save();
     }
     else {
-        let itemcheck = yield orderItem_1.default.findOne({ orderID: order._id, productID });
-        if (itemcheck) {
-            itemcheck.quantity += 1;
-            yield itemcheck.save();
-            order.price += itemcheck.itemPrice * itemcheck.quantity;
-            yield order.save();
-        }
-        else {
-            let item = yield orderItem_1.default.create({ orderID: order._id, productID, title, quantity, itemPrice, image });
-            order.price += item.itemPrice * item.quantity;
-            yield order.save();
-        }
-        let numItems = yield orderItem_1.default.find({ orderID: order._id }).countDocuments();
-        (0, utils_1.sendResponse)(res, 200, true, { order, numItems }, null, "Item added to cart");
+        let item = yield orderItem_1.default.create({ orderID: order._id, productID, title, quantity, itemPrice, image });
+        order.price += item.itemPrice * item.quantity;
+        yield order.save();
     }
+    let numItems = yield orderItem_1.default.find({ orderID: order._id }).countDocuments();
+    (0, utils_1.sendResponse)(res, 200, true, { order, numItems }, null, "Item added to cart");
 }));
 exports.getOrderItemById = (0, utils_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { id, itemid } = req.params;
